@@ -1,0 +1,7 @@
+{
+  "name": "念物 - 断舍离",
+  "description": "为你的旧物寻找数字归宿，释放空间，珍藏记忆。",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
