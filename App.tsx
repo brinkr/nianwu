@@ -721,7 +721,7 @@ const SentimentCard: React.FC<{ item: ArchivedItem, onClick: () => void, index: 
 );
 
 // --- Gallery View (Art Exhibition) ---
-const GalleryView = ({ items, onItemClick }: { items: ArchivedItem[], onItemClick: (item: ArchivedItem) => void }) => {
+const GalleryView = ({ items, onItemClick, onBack }: { items: ArchivedItem[], onItemClick: (item: ArchivedItem) => void, onBack: () => void }) => {
   const [tab, setTab] = useState<'sentiment' | 'utility'>('sentiment');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -742,7 +742,16 @@ const GalleryView = ({ items, onItemClick }: { items: ArchivedItem[], onItemClic
       {/* Header & Tabs */}
       <div className="pt-10 pb-4 px-6 backdrop-blur-xl sticky top-0 z-30 border-b border-stone-200/50 bg-paper/90">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-serif tracking-wide text-ink">念物馆</h2>
+          <div className="flex items-center space-x-4">
+             <button 
+               onClick={onBack}
+               className="text-stone-500 hover:text-stone-800 transition-colors"
+             >
+               <ArrowLeft size={20} strokeWidth={1.5} />
+             </button>
+             <h2 className="text-2xl font-serif tracking-wide text-ink">念物馆</h2>
+          </div>
+
           <button 
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             className="text-stone-400 hover:text-stone-600 transition-colors"
@@ -781,7 +790,8 @@ const GalleryView = ({ items, onItemClick }: { items: ArchivedItem[], onItemClic
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto hide-scrollbar pb-32">
+      {/* Reduced bottom padding since TabBar is removed */}
+      <div className="flex-1 overflow-y-auto hide-scrollbar pb-8">
         {filteredItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 opacity-40 space-y-4">
              {tab === 'sentiment' ? <Wind size={32} /> : <FileText size={32} />}
@@ -973,11 +983,11 @@ export default function App() {
       {view === AppView.SCAN && <ScanView onImageCaptured={handleArchiveStart} onCancel={() => setView(AppView.HOME)} />}
       {view === AppView.ANALYZING && <AnalyzingView />}
       {view === AppView.RITUAL && pendingAnalysis && <RitualView item={pendingAnalysis} onComplete={handleRitualComplete} onCancel={() => setView(AppView.HOME)} />}
-      {view === AppView.GALLERY && <GalleryView items={items} onItemClick={(item) => {setSelectedItem(item); setView(AppView.DETAIL);}} />}
+      {view === AppView.GALLERY && <GalleryView items={items} onItemClick={(item) => {setSelectedItem(item); setView(AppView.DETAIL);}} onBack={() => setView(AppView.HOME)} />}
       {view === AppView.DETAIL && selectedItem && <DetailView item={selectedItem} onBack={() => setView(AppView.GALLERY)} onDelete={handleDelete} />}
       
       {/* Floating Nav (Only on specific pages) */}
-      {(view === AppView.HOME || view === AppView.GALLERY) && (
+      {view === AppView.HOME && (
         <FloatingNavBar currentView={view} setView={setView} />
       )}
 
