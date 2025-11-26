@@ -65,7 +65,7 @@ export const seedDatabase = (): void => {
 
   const demoItems: ArchivedItem[] = [
     {
-      id: 'demo-1',
+      id: 'demo-sentiment-1',
       imageUri: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?q=80&w=800&auto=format&fit=crop',
       title: '六弦之夏',
       description: '琴颈微微变形，品丝磨损。它见证了大学时代草坪上的笨拙弹唱，也陪伴了无数个失眠的夜晚。上面的贴纸已经斑驳，那是属于那个夏天的印记。',
@@ -77,18 +77,29 @@ export const seedDatabase = (): void => {
       userNote: '大学时买的第一把吉他。'
     },
     {
-      id: 'demo-archive-1',
+      id: 'demo-utility-1',
+      imageUri: 'https://images.unsplash.com/photo-1628155930542-3c7a64e2c833?q=80&w=800&auto=format&fit=crop',
+      title: '物流包装箱 (规格L)',
+      description: '闲置瓦楞纸箱，尺寸 40x30x20cm。保存超过 6 个月，受潮变形，结构强度下降。',
+      farewellMessage: '经空间计算，该物品占用室内体积 0.024m³，且无再次利用价值。建议立即折叠回收。已确认无残留物品。',
+      sentiment: '准予丢弃',
+      category: '包装',
+      dateArchived: now - 86400000 * 0.5,
+      mode: 'utility'
+    },
+    {
+      id: 'demo-utility-2',
       imageUri: 'https://images.unsplash.com/photo-1585255318859-f5c15f4cffe9?q=80&w=800&auto=format&fit=crop',
       title: '过期票据 No.0921',
       description: '三年前的差旅报销凭证，纸张已氧化发黄，字迹模糊。经核查，相关财务流程已于2021年结案，该实体凭证无留存法律效力。',
       farewellMessage: '经系统核算，该凭证所载信息已完成数字化备份。物理载体已无留存必要。建议执行销毁，释放物理存储空间 0.01cm³。',
-      sentiment: '准予丢弃',
+      sentiment: '已审阅',
       category: '票据',
       dateArchived: now - 86400000 * 3,
       mode: 'utility'
     },
     {
-      id: 'demo-3',
+      id: 'demo-sentiment-2',
       imageUri: 'https://images.unsplash.com/photo-1550966871-3ed3c47e7490?q=80&w=800&auto=format&fit=crop',
       title: '十四行诗',
       description: '书页已经发脆，边缘卷起。这是你中学时最爱读的诗集，里面夹着一片枯萎的银杏叶。它曾是你逃离繁重课业的秘密花园。',
@@ -99,18 +110,18 @@ export const seedDatabase = (): void => {
       mode: 'sentiment'
     },
     {
-      id: 'demo-archive-2',
-      imageUri: 'https://images.unsplash.com/photo-1591193686104-fddba4d0e4d8?q=80&w=800&auto=format&fit=crop',
-      title: '废旧连接线 Type-A',
-      description: '外层橡胶老化发粘，接口处金属触点氧化。经测试，传输效率低于标准值 40%，且存在短路风险。',
-      farewellMessage: '设备检测结果：功能失效。继续保留存在安全隐患。请将其放入电子垃圾回收箱。此操作符合安全用电规范。',
-      sentiment: '无价值',
-      category: '数码',
+      id: 'demo-utility-3',
+      imageUri: 'https://images.unsplash.com/photo-1631549916768-4119b2e5f926?q=80&w=800&auto=format&fit=crop',
+      title: '布洛芬缓释胶囊 (已失效)',
+      description: '生产日期 2020-05，有效期至 2022-05。化学成分已降解，服用不仅无效且存在严重的肝肾毒性风险。',
+      farewellMessage: '安全警报：该物品已演变为生化废弃物。请务必将其投放到有害垃圾桶。断舍离不仅是清理空间，更是排除健康隐患。',
+      sentiment: '安全隐患',
+      category: '药品',
       dateArchived: now - 86400000 * 12,
       mode: 'utility'
     },
     {
-      id: 'demo-5',
+      id: 'demo-sentiment-3',
       imageUri: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=800&auto=format&fit=crop',
       title: '守夜人',
       description: '这盏台灯的灯罩已经褪色，开关偶尔接触不良。它曾用暖黄的光晕守护你熬夜复习的背影，也照亮过你写给初恋的信。',
