@@ -18,7 +18,9 @@ import {
   Circle,
   FileText,
   Stamp,
-  CheckCircle2
+  CheckCircle2,
+  List,
+  Grid
 } from 'lucide-react';
 import { archiveObject } from './services/geminiService';
 import { saveItem, getItems, deleteItem, getUserStats, seedDatabase } from './services/storageService';
@@ -544,86 +546,139 @@ const RitualView = ({
   );
 };
 
+// --- Gallery View Components ---
+
+// Refined Utility Row - Ledger Style
+const UtilityRow = ({ item, onClick }: { item: ArchivedItem, onClick: () => void }) => (
+  <div onClick={onClick} className="flex items-center p-3 border-b border-stone-300/60 bg-[#f4f2ea] hover:bg-[#eae8df] transition-colors cursor-pointer group relative overflow-hidden">
+    {/* Ledger decorative line */}
+    <div className="absolute left-0 top-0 bottom-0 w-1 bg-stone-300/50"></div>
+    
+    <div className="w-10 h-10 bg-stone-200 overflow-hidden rounded-sm flex-shrink-0 relative border border-stone-300 ml-2">
+      <img src={item.imageUri} className="w-full h-full object-cover saturate-0 contrast-125 opacity-70" alt="" />
+      <div className="absolute inset-0 bg-stone-500/10 mix-blend-multiply"></div>
+    </div>
+    
+    <div className="ml-4 flex-1 min-w-0 font-mono text-stone-700">
+      <div className="flex justify-between items-baseline mb-1">
+         <h4 className="text-xs font-bold tracking-tight truncate mr-2 text-stone-800">{item.title}</h4>
+         <span className="text-[9px] text-stone-400 shrink-0">{new Date(item.dateArchived).toLocaleDateString()}</span>
+      </div>
+      <div className="flex justify-between items-center">
+         <p className="text-[10px] text-stone-500 truncate max-w-[70%] tracking-tight border-b border-dashed border-stone-300 pb-0.5">{item.farewellMessage}</p>
+         <div className="flex items-center space-x-1 px-1.5 py-0.5 rounded-sm border border-stone-300 bg-white/50">
+           <span className="text-[8px] font-bold text-stone-600 uppercase tracking-wide">{item.sentiment}</span>
+         </div>
+      </div>
+    </div>
+  </div>
+);
+
+const SentimentCard = ({ item, onClick, index }: { item: ArchivedItem, onClick: () => void, index: number }) => (
+  <div onClick={onClick} className={`mb-8 break-inside-avoid cursor-pointer group`}>
+     <div className="relative overflow-hidden bg-white p-3 pb-6 shadow-[0_2px_10px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)] transition-all duration-500 rounded-sm">
+        <div className="aspect-[3/4] overflow-hidden bg-stone-100 mb-4 relative">
+          <img src={item.imageUri} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 saturate-[0.8] group-hover:saturate-100" alt="" />
+          <div className="absolute inset-0 ring-1 ring-inset ring-black/5"></div>
+        </div>
+        <div className="px-1 text-center">
+           <h3 className="font-serif text-lg text-ink mb-2 tracking-tight leading-relaxed">{item.title}</h3>
+           <div className="flex items-center justify-center space-x-2 opacity-60">
+             <div className="h-px w-3 bg-stone-300"></div>
+             <p className="text-[10px] text-stone-500 tracking-[0.2em] font-serif">{item.sentiment}</p>
+             <div className="h-px w-3 bg-stone-300"></div>
+           </div>
+        </div>
+     </div>
+  </div>
+);
+
 // --- Gallery View (Art Exhibition) ---
 const GalleryView = ({ items, onItemClick }: { items: ArchivedItem[], onItemClick: (item: ArchivedItem) => void }) => {
+  const [tab, setTab] = useState<'sentiment' | 'utility'>('sentiment');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   
-  const filteredItems = items.filter(item => 
-    searchQuery === '' || 
-    item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.sentiment.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredItems = items.filter(item => {
+    const matchesSearch = searchQuery === '' || 
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.sentiment.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // In utility tab, only show utility items. In sentiment tab, only show sentiment items.
+    const matchesTab = item.mode === tab; 
+    
+    return matchesSearch && matchesTab;
+  });
 
   return (
-    <div className="flex flex-col h-full bg-paper pb-20">
-      {/* Header */}
-      <div className="p-8 pb-4 bg-paper/95 backdrop-blur-md sticky top-0 z-20">
+    <div className="flex flex-col h-full relative bg-paper transition-colors duration-500">
+      {/* Header & Tabs */}
+      <div className="pt-10 pb-4 px-6 backdrop-blur-xl sticky top-0 z-30 border-b border-stone-200/50 bg-paper/90">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-serif text-ink tracking-wide">念物馆</h2>
+          <h2 className="text-2xl font-serif tracking-wide text-ink">念物馆</h2>
           <button 
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             className="text-stone-400 hover:text-stone-600 transition-colors"
           >
-            <Search size={18} />
+            <Search size={20} strokeWidth={1.5} />
           </button>
         </div>
         
-        {isSearchOpen && (
+        {/* Search Bar */}
+        <div className={`overflow-hidden transition-all duration-300 ${isSearchOpen ? 'h-12 opacity-100 mb-4' : 'h-0 opacity-0'}`}>
           <input 
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="寻觅一段记忆..."
-            className="w-full bg-transparent border-b border-stone-300 py-2 text-stone-600 font-serif placeholder-stone-400 focus:outline-none focus:border-stone-500 animate-fade-in"
-            autoFocus
+            placeholder="寻觅..."
+            className="w-full bg-transparent border-b border-stone-300 py-2 text-stone-600 font-serif focus:outline-none placeholder-stone-400"
           />
-        )}
+        </div>
+
+        {/* Tab Switcher */}
+        <div className="flex p-1 rounded-lg relative bg-stone-200/50">
+           <button 
+             onClick={() => setTab('sentiment')}
+             className={`flex-1 py-2 text-xs tracking-widest font-serif transition-all duration-300 rounded-md flex items-center justify-center space-x-2 ${tab === 'sentiment' ? 'bg-white shadow-sm text-amber-900' : 'text-stone-500 hover:text-stone-700'}`}
+           >
+             <Heart size={12} className={tab === 'sentiment' ? 'fill-amber-500/20' : ''} />
+             <span>追忆画廊</span>
+           </button>
+           <button 
+             onClick={() => setTab('utility')}
+             className={`flex-1 py-2 text-xs tracking-widest font-bold font-mono transition-all duration-300 rounded-md flex items-center justify-center space-x-2 ${tab === 'utility' ? 'bg-[#f4f2ea] shadow-sm text-stone-800' : 'text-stone-500 hover:text-stone-700'}`}
+           >
+             <Box size={12} className={tab === 'utility' ? 'text-stone-600' : ''} />
+             <span>封存档案</span>
+           </button>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-32 hide-scrollbar">
+      <div className="flex-1 overflow-y-auto hide-scrollbar pb-32">
         {filteredItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 opacity-30">
-             <Wind size={32} className="text-stone-400 mb-4" />
-             <p className="font-serif text-stone-400 text-sm">空 无 一 物</p>
+          <div className="flex flex-col items-center justify-center h-64 opacity-40 space-y-4">
+             {tab === 'sentiment' ? <Wind size={32} /> : <FileText size={32} />}
+             <p className="font-serif text-xs tracking-widest">此处空无一物</p>
           </div>
         ) : (
-          <div className="space-y-12 py-4">
-            {filteredItems.map((item, index) => (
-              <div 
-                key={item.id} 
-                onClick={() => onItemClick(item)}
-                className="group cursor-pointer"
-              >
-                {/* Asymmetric Layout - alternating slightly */}
-                <div className={`flex flex-col ${index % 2 === 0 ? 'items-start' : 'items-end'}`}>
-                  {/* Photo Card */}
-                  <div className={`
-                    relative p-3 pb-8 shadow-[0_4px_20px_rgba(0,0,0,0.05)] transform transition-transform duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] max-w-[85%]
-                    ${item.mode === 'utility' ? 'bg-stone-100' : 'bg-white'}
-                  `}>
-                     {/* Utility Indicator */}
-                     {item.mode === 'utility' && (
-                       <div className="absolute -top-2 -right-2 bg-slate-200 text-slate-600 text-[10px] px-2 py-1 rounded-sm font-bold tracking-widest z-10">
-                         FILE
-                       </div>
-                     )}
-
-                     <div className={`aspect-[4/5] overflow-hidden ${item.mode === 'utility' ? 'bg-slate-200' : 'bg-stone-100'}`}>
-                       <img src={item.imageUri} alt={item.title} className={`w-full h-full object-cover transition-opacity duration-500 ${item.mode === 'utility' ? 'opacity-90 saturate-[0.8] contrast-110' : 'opacity-95 saturate-[0.8] group-hover:saturate-100'}`} />
-                     </div>
-                     <div className="mt-4 px-2">
-                       <div className={`font-serif text-lg text-ink ${item.mode === 'utility' ? 'font-sans font-bold tracking-tighter text-slate-700' : ''}`}>{item.title}</div>
-                       <div className="flex justify-between items-center mt-2 border-t border-stone-200 pt-2">
-                         <span className="text-[10px] text-stone-400 uppercase tracking-widest">{new Date(item.dateArchived).toLocaleDateString()}</span>
-                         <span className={`text-[10px] font-serif ${item.mode === 'utility' ? 'text-slate-500 font-sans' : 'text-stone-500 italic'}`}>{item.sentiment}</span>
-                       </div>
-                     </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+           <>
+             {tab === 'sentiment' ? (
+               <div className="p-4 columns-2 gap-4 space-y-4">
+                 {filteredItems.map((item, i) => (
+                   <SentimentCard key={item.id} item={item} index={i} onClick={() => onItemClick(item)} />
+                 ))}
+               </div>
+             ) : (
+               <div className="border-t border-stone-300/50">
+                 {/* Utility List: Ledger Style */}
+                 <div className="bg-[repeating-linear-gradient(transparent,transparent_39px,#e5e2d6_40px)]">
+                   {filteredItems.map((item) => (
+                     <UtilityRow key={item.id} item={item} onClick={() => onItemClick(item)} />
+                   ))}
+                 </div>
+               </div>
+             )}
+           </>
         )}
       </div>
     </div>
@@ -636,7 +691,7 @@ const DetailView = ({ item, onBack, onDelete }: { item: ArchivedItem, onBack: ()
   const isUtility = item.mode === 'utility';
 
   return (
-    <div className={`h-full overflow-y-auto animate-in fade-in duration-500 relative ${isUtility ? 'bg-stone-100' : 'bg-paper'}`}>
+    <div className={`h-full overflow-y-auto animate-in fade-in duration-500 relative bg-paper`}>
       <button 
         onClick={onBack}
         className="fixed top-6 left-6 z-30 p-3 bg-black/20 backdrop-blur-md rounded-full text-white hover:bg-black/40 transition-colors shadow-lg"
@@ -657,7 +712,7 @@ const DetailView = ({ item, onBack, onDelete }: { item: ArchivedItem, onBack: ()
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent pointer-events-none"></div>
         
         {/* Bottom Fade Gradient (Smooth transition to content) */}
-        <div className={`absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t ${isUtility ? 'from-stone-100' : 'from-paper'} to-transparent`}></div>
+        <div className={`absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-paper to-transparent`}></div>
         
         {/* Vertical Title Overlay */}
         <div className="absolute top-20 right-8 z-10 writing-mode-vertical vertical-text text-white/95 drop-shadow-lg">
@@ -667,14 +722,14 @@ const DetailView = ({ item, onBack, onDelete }: { item: ArchivedItem, onBack: ()
 
       {/* Content */}
       <div className="relative z-20 px-6 pb-20 -mt-12">
-        <div className={`backdrop-blur-sm p-6 rounded-t-sm shadow-sm ${isUtility ? 'bg-stone-50 border border-stone-200' : 'bg-paper/95 border-t border-white/50'}`}>
+        <div className={`backdrop-blur-sm p-6 rounded-t-sm shadow-sm ${isUtility ? 'bg-[#f4f2ea] border border-stone-300' : 'bg-paper/95 border-t border-white/50'}`}>
           
           {/* Metadata Row */}
           <div className="flex justify-between items-end mb-6 border-b border-stone-200 pb-4">
              <div className="flex flex-col">
                <span className="text-[10px] text-stone-400 uppercase tracking-widest mb-1">{isUtility ? '状态' : '情感印记'}</span>
-               <span className={`font-serif text-stone-600 ${isUtility ? 'font-bold font-mono text-slate-700' : ''}`}>
-                 {isUtility && <CheckCircle2 size={12} className="inline mr-1 text-green-700" />}
+               <span className={`font-serif text-stone-600 ${isUtility ? 'font-bold font-mono text-stone-700' : ''}`}>
+                 {isUtility && <CheckCircle2 size={12} className="inline mr-1 text-stone-600" />}
                  {item.sentiment}
                </span>
              </div>
@@ -687,7 +742,7 @@ const DetailView = ({ item, onBack, onDelete }: { item: ArchivedItem, onBack: ()
           {/* Letter Section */}
           <div className="mb-10 relative">
             {!isUtility && <Feather className="absolute -top-6 -left-2 text-stone-200 w-12 h-12 -z-10 opacity-50" />}
-            {isUtility && <FileText className="absolute -top-6 -left-2 text-slate-200 w-12 h-12 -z-10 opacity-50" />}
+            {isUtility && <FileText className="absolute -top-6 -left-2 text-stone-200 w-12 h-12 -z-10 opacity-50" />}
             
             <p className={`text-lg leading-loose text-ink text-justify ${isUtility ? 'font-mono text-sm' : 'font-serif indent-8'}`}>
               {item.description}
@@ -695,8 +750,8 @@ const DetailView = ({ item, onBack, onDelete }: { item: ArchivedItem, onBack: ()
           </div>
 
           {/* Farewell Quote */}
-          <div className={`p-6 relative mb-12 ${isUtility ? 'bg-slate-200/50 border-2 border-dashed border-slate-300' : 'bg-stone-50 border-l-2 border-amber-800/20'}`}>
-             <div className={`absolute -top-3 left-4 px-2 text-xs tracking-widest uppercase ${isUtility ? 'bg-stone-100 text-slate-500 font-bold' : 'bg-stone-50 text-amber-900/40 font-serif'}`}>
+          <div className={`p-6 relative mb-12 ${isUtility ? 'bg-stone-200/30 border-2 border-dashed border-stone-300' : 'bg-stone-50 border-l-2 border-amber-800/20'}`}>
+             <div className={`absolute -top-3 left-4 px-2 text-xs tracking-widest uppercase ${isUtility ? 'bg-[#f4f2ea] text-stone-500 font-bold' : 'bg-stone-50 text-amber-900/40 font-serif'}`}>
                {isUtility ? '处置回执' : '物品寄语'}
              </div>
              <p className={`text-stone-600 leading-loose ${isUtility ? 'font-mono text-xs' : 'font-serif italic'}`}>
