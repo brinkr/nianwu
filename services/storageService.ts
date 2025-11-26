@@ -67,13 +67,13 @@ export const seedDatabase = (): void => {
     {
       id: 'demo-1',
       imageUri: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?q=80&w=800&auto=format&fit=crop',
-      title: '沉默的六弦琴',
-      description: '这把吉他琴颈已经微微变形，品丝也磨损了。它见证了大学时代草坪上的笨拙弹唱，也陪伴了无数个失眠的夜晚。上面的贴纸已经斑驳，那是属于那个夏天的印记。',
-      farewellMessage: '主人，谢谢你曾用指尖赋予我生命。那些笨拙的和弦是我们共同的青春。我不遗憾被放下，因为音乐已经留在了你的身体里。轻装上阵吧，去演奏更精彩的人生。',
+      title: '六弦之夏',
+      description: '琴颈微微变形，品丝磨损。它见证了大学时代草坪上的笨拙弹唱，也陪伴了无数个失眠的夜晚。上面的贴纸已经斑驳，那是属于那个夏天的印记。',
+      farewellMessage: '主人，谢谢你曾用指尖赋予我生命。那些笨拙的和弦是我们共同的青春。我不遗憾被放下，因为音乐已经留在了你的身体里。',
       sentiment: '青春回响',
       category: '乐器',
       dateArchived: now - 86400000 * 2, // 2 days ago
-      userNote: '大学时买的第一把吉他，好久没弹了，搬家带着太麻烦。'
+      userNote: '大学时买的第一把吉他。'
     },
     {
       id: 'demo-2',
@@ -88,7 +88,7 @@ export const seedDatabase = (): void => {
     {
       id: 'demo-3',
       imageUri: 'https://images.unsplash.com/photo-1550966871-3ed3c47e7490?q=80&w=800&auto=format&fit=crop',
-      title: '泛黄的诗集',
+      title: '十四行诗',
       description: '书页已经发脆，边缘卷起。这是你中学时最爱读的诗集，里面夹着一片枯萎的银杏叶。它曾是你逃离繁重课业的秘密花园。',
       farewellMessage: '文字的灵魂已经住进了你的心里，载体便不再重要。当你在生活中偶然念起一句诗，那就是我存在的证明。',
       sentiment: '静谧时光',
@@ -108,7 +108,7 @@ export const seedDatabase = (): void => {
     {
       id: 'demo-5',
       imageUri: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=800&auto=format&fit=crop',
-      title: '旧时灯盏',
+      title: '守夜人',
       description: '这盏台灯的灯罩已经褪色，开关偶尔接触不良。它曾用暖黄的光晕守护你熬夜复习的背影，也照亮过你写给初恋的信。',
       farewellMessage: '我见证了你所有的努力与孤独。现在，你心里的光已经足够明亮，不再需要我这微弱的灯火了。',
       sentiment: '温暖守护',
