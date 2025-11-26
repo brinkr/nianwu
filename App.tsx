@@ -212,19 +212,22 @@ const HomeView = ({ onStartDeclutter, onSeedData, onOpenSettings }: { onStartDec
       
       <div className="flex-1 flex flex-col p-8 pt-12 relative z-10">
         <header className="mb-12 flex justify-between items-start animate-fade-in-up relative z-20">
-          {/* Left: Settings Trigger (Hidden in plain sight) */}
+          
+          {/* Left: Brand Identity */}
+          <div className="text-left">
+             <h1 className="text-4xl font-serif text-ink mb-1 tracking-tight">念物</h1>
+             <p className="text-stone-400 text-[10px] tracking-[0.3em] uppercase opacity-70">MONO NO AWARE</p>
+          </div>
+
+          {/* Right: Settings Action */}
           <button 
              onClick={onOpenSettings}
-             className="p-2 -ml-2 text-stone-400 hover:text-stone-600 transition-colors opacity-60 hover:opacity-100"
+             className="p-2 -mr-2 text-stone-400 hover:text-stone-600 transition-colors opacity-60 hover:opacity-100"
           >
              <Settings size={20} strokeWidth={1.5} />
           </button>
-
-          <div className="text-right">
-             <h1 className="text-4xl font-serif text-ink mb-1 tracking-tight">念物</h1>
-             <p className="text-stone-400 text-[10px] tracking-[0.3em] uppercase opacity-70">Digital Keep</p>
-          </div>
           
+          {/* Vertical Decor Text */}
           <div className="absolute top-12 right-0 vertical-text text-stone-300 font-serif text-xs h-24 tracking-widest opacity-40 pointer-events-none">
              万物皆有灵 · 唯舍即是得
           </div>
