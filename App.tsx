@@ -31,49 +31,6 @@ import { archiveObject } from './services/geminiService';
 import { saveItem, getItems, deleteItem, getUserStats, seedDatabase } from './services/storageService';
 import { ArchivedItem, AppView, GeminiResponse, UserStats, ArchiveMode } from './types';
 
-// --- Artistic Components ---
-
-const FloatingNavBar = ({ currentView, setView }: { currentView: AppView, setView: (v: AppView) => void }) => (
-  <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in-up">
-    {/* 
-      Design Concept: "The Ink & Paper" 
-      Container is frosted glass (Paper/Void), Center button is solid (Ink/Substance).
-    */}
-    <div className="flex items-center gap-1 pl-6 pr-2 py-1.5 bg-[#e7e5e4]/80 backdrop-blur-xl rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/40 ring-1 ring-white/20">
-      
-      {/* Left: Home / Self */}
-      <button 
-        onClick={() => setView(AppView.HOME)}
-        className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 group ${currentView === AppView.HOME ? 'text-stone-800 bg-white/60 shadow-sm' : 'text-stone-500 hover:text-stone-700 hover:bg-white/40'}`}
-      >
-        <Feather size={20} strokeWidth={currentView === AppView.HOME ? 2 : 1.5} className="transition-transform duration-500 group-hover:-translate-y-0.5" />
-      </button>
-      
-      {/* Divider (Subtle) */}
-      <div className="w-px h-4 bg-stone-400/20 mx-2"></div>
-
-      {/* Right: Gallery */}
-      <button 
-        onClick={() => setView(AppView.GALLERY)}
-        className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 group ${currentView === AppView.GALLERY ? 'text-stone-800 bg-white/60 shadow-sm' : 'text-stone-500 hover:text-stone-700 hover:bg-white/40'}`}
-      >
-         <Archive size={20} strokeWidth={currentView === AppView.GALLERY ? 2 : 1.5} className="transition-transform duration-500 group-hover:-translate-y-0.5" />
-      </button>
-
-      {/* Center: Action (The Ink Drop) - Visually distinct and pushed to the right slightly or separated */}
-      <div className="ml-3">
-        <button 
-          onClick={() => setView(AppView.SCAN)}
-          className="w-14 h-14 bg-stone-800 text-stone-100 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:bg-stone-900 hover:scale-105 active:scale-95 transition-all duration-300 group"
-        >
-          <Plus size={26} strokeWidth={1.5} className="group-hover:rotate-90 transition-transform duration-500" />
-        </button>
-      </div>
-
-    </div>
-  </div>
-);
-
 // --- Settings / Data Sheet (The Hidden Fourth Entry) ---
 const SettingsSheet = ({ isOpen, onClose, onSeedData }: { isOpen: boolean, onClose: () => void, onSeedData: () => void }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -195,8 +152,16 @@ const SettingsSheet = ({ isOpen, onClose, onSeedData }: { isOpen: boolean, onClo
   );
 };
 
-// --- Home View (Zen Sanctuary) ---
-const HomeView = ({ onStartDeclutter, onSeedData, onOpenSettings }: { onStartDeclutter: () => void, onSeedData: () => void, onOpenSettings: () => void }) => {
+// --- Home View (Zen Sanctuary - No TabBar Layout) ---
+const HomeView = ({ 
+  onStartDeclutter, 
+  onOpenSettings,
+  onOpenGallery
+}: { 
+  onStartDeclutter: () => void, 
+  onOpenSettings: () => void,
+  onOpenGallery: () => void
+}) => {
   const [stats, setStats] = useState<UserStats | null>(null);
 
   useEffect(() => {
@@ -226,11 +191,6 @@ const HomeView = ({ onStartDeclutter, onSeedData, onOpenSettings }: { onStartDec
           >
              <Settings size={20} strokeWidth={1.5} />
           </button>
-          
-          {/* Vertical Decor Text */}
-          <div className="absolute top-12 right-0 vertical-text text-stone-300 font-serif text-xs h-24 tracking-widest opacity-40 pointer-events-none">
-             万物皆有灵 · 唯舍即是得
-          </div>
         </header>
 
         <div className="flex-1 flex flex-col items-center justify-center relative -mt-20">
@@ -242,10 +202,13 @@ const HomeView = ({ onStartDeclutter, onSeedData, onOpenSettings }: { onStartDec
                style={{ transform: `scale(${1 + (stats.levelProgress / 200)})` }}
             ></div>
             
-            <div className="relative z-10 text-center flex flex-col items-center">
+            <div 
+              className="relative z-10 text-center flex flex-col items-center cursor-pointer group"
+              onClick={onOpenGallery}
+            >
               <span className="font-serif text-stone-500 text-sm mb-3 tracking-[0.2em] border-b border-stone-300 pb-1">修行境界</span>
               <h2 className="text-5xl font-serif text-ink mb-4 tracking-wider">{stats.levelTitle}</h2>
-              <div className="flex items-center space-x-2 text-stone-400 text-xs tracking-widest mt-2">
+              <div className="flex items-center space-x-2 text-stone-400 text-xs tracking-widest mt-2 group-hover:text-stone-600 transition-colors">
                 <span>已释放</span>
                 <span className="text-stone-600 font-serif text-lg">{stats.totalReleased}</span>
                 <span>件旧物</span>
@@ -253,7 +216,7 @@ const HomeView = ({ onStartDeclutter, onSeedData, onOpenSettings }: { onStartDec
             </div>
             
             {/* Orbiting text */}
-            <svg className="absolute inset-0 w-full h-full animate-[spin_60s_linear_infinite] opacity-10">
+            <svg className="absolute inset-0 w-full h-full animate-[spin_60s_linear_infinite] opacity-10 pointer-events-none">
               <defs>
                 <path id="circlePath" d="M 144, 144 m -120, 0 a 120,120 0 1,1 240,0 a 120,120 0 1,1 -240,0" />
               </defs>
@@ -266,9 +229,41 @@ const HomeView = ({ onStartDeclutter, onSeedData, onOpenSettings }: { onStartDec
           </div>
         </div>
 
-        <div className="pb-32 flex flex-col items-center space-y-8 animate-fade-in">
-          <p className="font-serif text-stone-500 text-sm text-center leading-loose max-w-xs italic opacity-80">
-            "我们告别的不是物品，<br/>而是依附在物品上的那个旧的自己。"
+        {/* Right Vertical Navigation (The Gate) */}
+        <button 
+          onClick={onOpenGallery}
+          className="absolute right-0 top-1/2 -translate-y-1/2 w-16 h-48 flex items-center justify-center group"
+        >
+          <div className="vertical-text font-serif text-stone-300 text-xs tracking-[0.8em] group-hover:text-stone-500 transition-colors duration-500 h-full border-l border-stone-200/50 pl-6 hover:border-stone-300">
+            念物馆
+          </div>
+        </button>
+
+        <div className="pb-12 flex flex-col items-center animate-fade-in relative z-20">
+          
+          {/* Main Action Button: The Floating Inkstone */}
+          <div className="relative group">
+             <button 
+               onClick={onStartDeclutter}
+               // w-20 h-20 (80px) for substantial presence
+               // bg-gradient-to-br from-stone-800 to-stone-950 for depth (simulating stone material)
+               // shadow-[0_20px_40px_-10px_rgba(28,25,23,0.5)] for 'floating' illusion
+               // ring-1 ring-white/5 for subtle edge highlight
+               className="w-20 h-20 rounded-full relative z-10 bg-gradient-to-br from-stone-800 to-stone-950 text-stone-200 flex items-center justify-center shadow-[0_20px_40px_-10px_rgba(28,25,23,0.5)] hover:shadow-[0_25px_50px_-12px_rgba(28,25,23,0.6)] hover:scale-105 active:scale-95 transition-all duration-700 ease-out border border-stone-800 ring-1 ring-white/10"
+             >
+               {/* Thinner stroke for engraved look */}
+               <Plus size={32} strokeWidth={0.8} className="text-stone-200/90 drop-shadow-md" />
+               
+               {/* Inner shine for polished stone look */}
+               <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent to-white/5 opacity-50"></div>
+             </button>
+             
+             {/* Ambient Glow */}
+             <div className="absolute inset-0 bg-stone-900 rounded-full blur-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-1000 -z-10 translate-y-4"></div>
+          </div>
+
+          <p className="font-serif text-stone-400 text-[10px] text-center mt-6 tracking-[0.3em] opacity-60">
+             仪式 · 开启
           </p>
         </div>
       </div>
@@ -790,7 +785,7 @@ const GalleryView = ({ items, onItemClick, onBack }: { items: ArchivedItem[], on
         </div>
       </div>
 
-      {/* Reduced bottom padding since TabBar is removed */}
+      {/* No bottom padding / No TabBar */}
       <div className="flex-1 overflow-y-auto hide-scrollbar pb-8">
         {filteredItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 opacity-40 space-y-4">
@@ -976,8 +971,8 @@ export default function App() {
       {view === AppView.HOME && (
         <HomeView 
           onStartDeclutter={() => setView(AppView.SCAN)} 
-          onSeedData={() => {seedDatabase(); setItems(getItems());}} 
           onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenGallery={() => setView(AppView.GALLERY)}
         />
       )}
       {view === AppView.SCAN && <ScanView onImageCaptured={handleArchiveStart} onCancel={() => setView(AppView.HOME)} />}
@@ -986,11 +981,6 @@ export default function App() {
       {view === AppView.GALLERY && <GalleryView items={items} onItemClick={(item) => {setSelectedItem(item); setView(AppView.DETAIL);}} onBack={() => setView(AppView.HOME)} />}
       {view === AppView.DETAIL && selectedItem && <DetailView item={selectedItem} onBack={() => setView(AppView.GALLERY)} onDelete={handleDelete} />}
       
-      {/* Floating Nav (Only on specific pages) */}
-      {view === AppView.HOME && (
-        <FloatingNavBar currentView={view} setView={setView} />
-      )}
-
       {/* Settings Overlay */}
       <SettingsSheet 
         isOpen={isSettingsOpen} 
