@@ -1,6 +1,6 @@
 import { ArchivedItem, UserStats } from '../types';
 
-const STORAGE_KEY = 'digital_keep_items_v1';
+const STORAGE_KEY = 'digital_keep_items_v2';
 
 export const getItems = (): ArchivedItem[] => {
   try {
@@ -72,18 +72,20 @@ export const seedDatabase = (): void => {
       farewellMessage: '主人，谢谢你曾用指尖赋予我生命。那些笨拙的和弦是我们共同的青春。我不遗憾被放下，因为音乐已经留在了你的身体里。',
       sentiment: '青春回响',
       category: '乐器',
-      dateArchived: now - 86400000 * 2, // 2 days ago
+      dateArchived: now - 86400000 * 2,
+      mode: 'sentiment',
       userNote: '大学时买的第一把吉他。'
     },
     {
-      id: 'demo-2',
-      imageUri: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800&auto=format&fit=crop',
-      title: '远行者',
-      description: '鞋底磨平了花纹，红色的鞋面也有些泛黄。它陪你走过毕业旅行的泥泞，也跑过第一次马拉松的终点。每一道褶皱里都藏着一段路途。',
-      farewellMessage: '嘿，伙计。我们一起丈量过世界的宽广，真的很过瘾。我的旅途到此为止了，但你的路还在延伸。别回头，跑下去。',
-      sentiment: '脚踏实地',
-      category: '衣物',
-      dateArchived: now - 86400000 * 5, // 5 days ago
+      id: 'demo-archive-1',
+      imageUri: 'https://images.unsplash.com/photo-1585255318859-f5c15f4cffe9?q=80&w=800&auto=format&fit=crop',
+      title: '过期票据 No.0921',
+      description: '三年前的差旅报销凭证，纸张已氧化发黄，字迹模糊。经核查，相关财务流程已于2021年结案，该实体凭证无留存法律效力。',
+      farewellMessage: '经系统核算，该凭证所载信息已完成数字化备份。物理载体已无留存必要。建议执行销毁，释放物理存储空间 0.01cm³。',
+      sentiment: '准予丢弃',
+      category: '票据',
+      dateArchived: now - 86400000 * 3,
+      mode: 'utility'
     },
     {
       id: 'demo-3',
@@ -93,17 +95,19 @@ export const seedDatabase = (): void => {
       farewellMessage: '文字的灵魂已经住进了你的心里，载体便不再重要。当你在生活中偶然念起一句诗，那就是我存在的证明。',
       sentiment: '静谧时光',
       category: '书籍',
-      dateArchived: now - 86400000 * 10, // 10 days ago
+      dateArchived: now - 86400000 * 10,
+      mode: 'sentiment'
     },
     {
-      id: 'demo-4',
-      imageUri: 'https://images.unsplash.com/photo-1512418490979-92798cec1380?q=80&w=800&auto=format&fit=crop',
-      title: '红色闪电',
-      description: '这辆缺了一个轮子的玩具赛车，曾是你童年最快的“座驾”。漆面剥落露出了金属底色，却依然有着一种倔强的速度感。',
-      farewellMessage: '现在的你已经可以驾驶真正的车去任何地方了。我会在赛道的终点为你欢呼，永远做那个相信你是第一名的朋友。',
-      sentiment: '童心未泯',
-      category: '玩具',
-      dateArchived: now - 86400000 * 15,
+      id: 'demo-archive-2',
+      imageUri: 'https://images.unsplash.com/photo-1591193686104-fddba4d0e4d8?q=80&w=800&auto=format&fit=crop',
+      title: '废旧连接线 Type-A',
+      description: '外层橡胶老化发粘，接口处金属触点氧化。经测试，传输效率低于标准值 40%，且存在短路风险。',
+      farewellMessage: '设备检测结果：功能失效。继续保留存在安全隐患。请将其放入电子垃圾回收箱。此操作符合安全用电规范。',
+      sentiment: '无价值',
+      category: '数码',
+      dateArchived: now - 86400000 * 12,
+      mode: 'utility'
     },
     {
       id: 'demo-5',
@@ -114,6 +118,7 @@ export const seedDatabase = (): void => {
       sentiment: '温暖守护',
       category: '家居',
       dateArchived: now - 86400000 * 30,
+      mode: 'sentiment'
     }
   ];
 

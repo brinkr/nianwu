@@ -1,13 +1,16 @@
+export type ArchiveMode = 'sentiment' | 'utility';
+
 export interface ArchivedItem {
   id: string;
   imageUri: string;
   title: string;
   description: string;
-  farewellMessage: string; // New: A direct message from the object to the owner
-  sentiment: string;
+  farewellMessage: string; // For utility, this is the "Disposition Note"
+  sentiment: string;       // For utility, this is the "Status"
   category: string;
   dateArchived: number;
   userNote?: string;
+  mode: ArchiveMode;
 }
 
 export interface GeminiResponse {
@@ -16,13 +19,14 @@ export interface GeminiResponse {
   farewellMessage: string;
   sentiment: string;
   category: string;
+  mode?: ArchiveMode;
 }
 
 export enum AppView {
   HOME = 'HOME',
   SCAN = 'SCAN',
-  ANALYZING = 'ANALYZING', // AI is thinking
-  RITUAL = 'RITUAL',       // User reviews and performs the "release" action
+  ANALYZING = 'ANALYZING',
+  RITUAL = 'RITUAL',
   GALLERY = 'GALLERY',
   DETAIL = 'DETAIL'
 }

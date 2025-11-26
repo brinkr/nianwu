@@ -15,43 +15,46 @@ import {
   X,
   Share2,
   Feather,
-  Circle
+  Circle,
+  FileText,
+  Stamp,
+  CheckCircle2
 } from 'lucide-react';
 import { archiveObject } from './services/geminiService';
 import { saveItem, getItems, deleteItem, getUserStats, seedDatabase } from './services/storageService';
-import { ArchivedItem, AppView, GeminiResponse, UserStats } from './types';
+import { ArchivedItem, AppView, GeminiResponse, UserStats, ArchiveMode } from './types';
 
 // --- Artistic Components ---
 
 const FloatingNavBar = ({ currentView, setView }: { currentView: AppView, setView: (v: AppView) => void }) => (
-  <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-    <div className="flex items-center space-x-6 bg-stone-900/90 backdrop-blur-md px-8 py-4 rounded-full shadow-2xl border border-stone-800/50">
+  <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in-up">
+    <div className="flex items-center space-x-8 bg-stone-900/95 backdrop-blur-xl px-10 py-5 rounded-full shadow-2xl border border-stone-800/50 ring-1 ring-white/5">
       <button 
         onClick={() => setView(AppView.HOME)}
-        className={`transition-all duration-300 ${currentView === AppView.HOME ? 'text-amber-100 scale-110' : 'text-stone-500 hover:text-stone-300'}`}
+        className={`transition-all duration-500 ease-out group ${currentView === AppView.HOME ? 'text-amber-100 scale-110' : 'text-stone-500 hover:text-stone-300'}`}
       >
-        <div className="flex flex-col items-center">
-          <Feather size={20} strokeWidth={currentView === AppView.HOME ? 2.5 : 2} />
+        <div className="flex flex-col items-center space-y-1">
+          <Feather size={22} strokeWidth={currentView === AppView.HOME ? 2 : 1.5} className="group-hover:animate-pulse" />
         </div>
       </button>
       
-      <div className="w-px h-6 bg-stone-700/50"></div>
+      <div className="w-px h-8 bg-stone-700/50"></div>
 
       <button 
         onClick={() => setView(AppView.SCAN)}
-        className="bg-stone-100 text-stone-900 p-3 rounded-full hover:bg-white hover:scale-105 transition-all shadow-lg active:scale-95"
+        className="bg-stone-100 text-stone-900 p-4 rounded-full hover:bg-white hover:scale-110 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-95 group"
       >
-        <Plus size={24} strokeWidth={2.5} />
+        <Plus size={28} strokeWidth={2} className="group-hover:rotate-90 transition-transform duration-500" />
       </button>
 
-      <div className="w-px h-6 bg-stone-700/50"></div>
+      <div className="w-px h-8 bg-stone-700/50"></div>
 
       <button 
         onClick={() => setView(AppView.GALLERY)}
-        className={`transition-all duration-300 ${currentView === AppView.GALLERY ? 'text-amber-100 scale-110' : 'text-stone-500 hover:text-stone-300'}`}
+        className={`transition-all duration-500 ease-out ${currentView === AppView.GALLERY ? 'text-amber-100 scale-110' : 'text-stone-500 hover:text-stone-300'}`}
       >
-        <div className="flex flex-col items-center">
-           <Archive size={20} strokeWidth={currentView === AppView.GALLERY ? 2.5 : 2} />
+        <div className="flex flex-col items-center space-y-1">
+           <Archive size={22} strokeWidth={currentView === AppView.GALLERY ? 2 : 1.5} />
         </div>
       </button>
     </div>
@@ -74,17 +77,17 @@ const HomeView = ({ onStartDeclutter, onSeedData }: { onStartDeclutter: () => vo
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-b from-stone-200/40 to-transparent rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none animate-float"></div>
       
       <div className="flex-1 flex flex-col p-8 pt-16 relative z-10">
-        <header className="mb-8 flex justify-between items-start animate-fade-in-up">
+        <header className="mb-12 flex justify-between items-start animate-fade-in-up">
           <div>
             <h1 className="text-5xl font-serif text-ink mb-2 tracking-tight">念物</h1>
-            <p className="text-stone-400 text-xs tracking-[0.3em] uppercase">Mono No Aware</p>
+            <p className="text-stone-400 text-xs tracking-[0.3em] uppercase opacity-70">Digital Keep</p>
           </div>
           <div className="vertical-text text-stone-300 font-serif text-xs h-24 tracking-widest opacity-60">
-             万物皆有灵
+             万物皆有灵 · 唯舍即是得
           </div>
         </header>
 
-        <div className="flex-1 flex flex-col items-center justify-center relative">
+        <div className="flex-1 flex flex-col items-center justify-center relative -mt-10">
           {/* Zen Circle Visualization */}
           <div className="relative w-72 h-72 flex items-center justify-center">
             {/* The Breathing Orb */}
@@ -94,12 +97,13 @@ const HomeView = ({ onStartDeclutter, onSeedData }: { onStartDeclutter: () => vo
             ></div>
             
             <div className="relative z-10 text-center flex flex-col items-center">
-              <span className="font-serif text-stone-500 text-sm mb-2 tracking-widest">境界</span>
-              <h2 className="text-4xl font-serif text-ink mb-4">{stats.levelTitle}</h2>
-              <div className="w-px h-8 bg-stone-300 mb-4"></div>
-              <p className="text-xs text-stone-400 tracking-widest">
-                已释放 {stats.totalReleased} 件旧物
-              </p>
+              <span className="font-serif text-stone-500 text-sm mb-3 tracking-[0.2em] border-b border-stone-300 pb-1">修行境界</span>
+              <h2 className="text-5xl font-serif text-ink mb-4 tracking-wider">{stats.levelTitle}</h2>
+              <div className="flex items-center space-x-2 text-stone-400 text-xs tracking-widest mt-2">
+                <span>已释放</span>
+                <span className="text-stone-600 font-serif text-lg">{stats.totalReleased}</span>
+                <span>件旧物</span>
+              </div>
             </div>
             
             {/* Orbiting text */}
@@ -107,25 +111,25 @@ const HomeView = ({ onStartDeclutter, onSeedData }: { onStartDeclutter: () => vo
               <defs>
                 <path id="circlePath" d="M 144, 144 m -120, 0 a 120,120 0 1,1 240,0 a 120,120 0 1,1 -240,0" />
               </defs>
-              <text fontSize="10">
+              <text fontSize="9">
                 <textPath href="#circlePath" className="font-serif tracking-[0.5em] fill-current text-stone-900">
-                  LET GO OF THE PAST TO MAKE ROOM FOR THE FUTURE • 
+                  放下过往 • 腾出空间 • 拥抱未来 • 
                 </textPath>
               </text>
             </svg>
           </div>
         </div>
 
-        <div className="pb-32 flex flex-col items-center space-y-8">
+        <div className="pb-32 flex flex-col items-center space-y-8 animate-fade-in">
           <p className="font-serif text-stone-500 text-sm text-center leading-loose max-w-xs italic opacity-80">
             "我们告别的不是物品，<br/>而是依附在物品上的那个旧的自己。"
           </p>
           
           {/* Demo Controls - Made Visible */}
-          <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-col items-center gap-4 opacity-50 hover:opacity-100 transition-opacity">
              <button 
                onClick={onSeedData}
-               className="px-6 py-2 rounded-full border border-stone-300 text-stone-500 text-xs tracking-widest hover:bg-stone-200/50 hover:text-stone-700 transition-all font-serif"
+               className="px-6 py-2 rounded-full border border-stone-300 text-stone-500 text-xs tracking-[0.2em] hover:bg-stone-200/50 hover:text-stone-700 transition-all font-serif"
              >
                注入演示数据
              </button>
@@ -144,10 +148,11 @@ const HomeView = ({ onStartDeclutter, onSeedData }: { onStartDeclutter: () => vo
 };
 
 // --- Scan View (Camera) ---
-const ScanView = ({ onImageCaptured, onCancel }: { onImageCaptured: (file: File, note: string) => void, onCancel: () => void }) => {
+const ScanView = ({ onImageCaptured, onCancel }: { onImageCaptured: (file: File, note: string, mode: ArchiveMode) => void, onCancel: () => void }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [note, setNote] = useState('');
+  const [mode, setMode] = useState<ArchiveMode>('sentiment');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -160,30 +165,43 @@ const ScanView = ({ onImageCaptured, onCancel }: { onImageCaptured: (file: File,
     }
   };
 
+  const handleSelectFile = () => {
+    // Reset value to allow selecting the same file again if needed
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    fileInputRef.current?.click();
+  }
+
   return (
     <div className="flex flex-col h-full bg-stone-900 text-stone-50 relative">
       <div className="absolute top-0 left-0 right-0 p-6 z-20 flex justify-between items-center">
         <button onClick={onCancel} className="p-2 rounded-full hover:bg-white/10 transition-colors text-white/70">
           <ArrowLeft size={24} />
         </button>
-        <span className="text-white/50 text-xs tracking-[0.2em] font-serif">PICK UP</span>
+        <span className="text-white/40 text-xs tracking-[0.3em] font-serif">拾 遗</span>
       </div>
 
       <div className="flex-1 flex flex-col">
         {preview ? (
-          <div className="flex-1 relative bg-black flex flex-col">
+          <div className="flex-1 relative bg-black flex flex-col animate-fade-in">
             <div className="flex-1 relative overflow-hidden">
                <img src={preview} alt="To archive" className="w-full h-full object-cover opacity-90" />
                <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-transparent to-transparent"></div>
+               
+               {/* Mode Indicator Overlay */}
+               <div className="absolute top-6 right-6 px-3 py-1 bg-black/40 backdrop-blur-md rounded-full border border-white/10">
+                 <span className="text-[10px] tracking-widest text-white/80">
+                   {mode === 'sentiment' ? '仪式：羁绊' : '仪式：尘俗'}
+                 </span>
+               </div>
             </div>
             
-            <div className="p-8 bg-stone-900 -mt-10 relative z-10 rounded-t-3xl">
+            <div className="p-8 bg-stone-900 -mt-10 relative z-10 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
                <div className="mb-8">
                  <input
                    value={note}
                    onChange={(e) => setNote(e.target.value)}
-                   placeholder="这件物品对你的意义..."
-                   className="w-full bg-transparent text-xl font-serif text-stone-200 placeholder-stone-600 focus:outline-none border-b border-stone-800 pb-2"
+                   placeholder={mode === 'sentiment' ? "这件物品承载了什么记忆..." : "备注物品瑕疵或处理原因..."}
+                   className="w-full bg-transparent text-lg font-serif text-stone-200 placeholder-stone-600 focus:outline-none border-b border-stone-800 pb-3 transition-colors focus:border-stone-500"
                  />
                </div>
                
@@ -192,28 +210,64 @@ const ScanView = ({ onImageCaptured, onCancel }: { onImageCaptured: (file: File,
                    onClick={() => { setSelectedFile(null); setPreview(null); }}
                    className="flex-1 py-4 rounded-full border border-stone-700 text-stone-400 hover:text-white transition-colors text-xs tracking-widest"
                  >
-                   重拍
+                   重选
                  </button>
                  <button 
-                   onClick={() => selectedFile && onImageCaptured(selectedFile, note)}
-                   className="flex-[2] py-4 rounded-full bg-stone-100 text-stone-900 font-bold text-xs tracking-widest hover:bg-white transition-colors flex items-center justify-center space-x-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                   onClick={() => selectedFile && onImageCaptured(selectedFile, note, mode)}
+                   className={`flex-[2] py-4 rounded-full font-bold text-xs tracking-widest transition-all flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl active:scale-95 ${
+                     mode === 'sentiment' 
+                       ? 'bg-amber-100 text-amber-900 hover:bg-white' 
+                       : 'bg-stone-200 text-stone-900 hover:bg-white'
+                   }`}
                  >
-                   <Sparkles size={14} />
-                   <span>开始通灵</span>
+                   {mode === 'sentiment' ? <Sparkles size={14} /> : <Stamp size={14} />}
+                   <span>{mode === 'sentiment' ? '开始通灵' : '确认归档'}</span>
                  </button>
                </div>
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-8">
+          <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-12">
+            
+            {/* Mode Switcher */}
+            <div className="flex items-center space-x-12 relative">
+               <button 
+                 onClick={() => setMode('sentiment')}
+                 className={`relative pb-2 transition-all duration-500 ${mode === 'sentiment' ? 'text-amber-100 opacity-100' : 'text-stone-500 opacity-50 hover:opacity-80'}`}
+               >
+                 <div className="flex flex-col items-center space-y-2">
+                   <Heart size={24} strokeWidth={1} className={mode === 'sentiment' ? 'fill-amber-500/20' : ''} />
+                   <span className="font-serif text-lg tracking-[0.2em]">羁绊</span>
+                 </div>
+                 {mode === 'sentiment' && <div className="absolute bottom-0 left-0 right-0 h-px bg-amber-100/50 shadow-[0_0_10px_rgba(251,191,36,0.5)]"></div>}
+               </button>
+
+               <div className="w-px h-12 bg-stone-800"></div>
+
+               <button 
+                 onClick={() => setMode('utility')}
+                 className={`relative pb-2 transition-all duration-500 ${mode === 'utility' ? 'text-blue-100 opacity-100' : 'text-stone-500 opacity-50 hover:opacity-80'}`}
+               >
+                 <div className="flex flex-col items-center space-y-2">
+                   <Box size={24} strokeWidth={1} className={mode === 'utility' ? 'fill-blue-500/20' : ''} />
+                   <span className="font-serif text-lg tracking-[0.2em]">尘俗</span>
+                 </div>
+                 {mode === 'utility' && <div className="absolute bottom-0 left-0 right-0 h-px bg-blue-100/50 shadow-[0_0_10px_rgba(147,197,253,0.5)]"></div>}
+               </button>
+            </div>
+
+            <p className="text-stone-500 text-xs font-serif tracking-widest h-4 transition-all duration-300">
+              {mode === 'sentiment' ? '—— 唯美告别，释放情感 ——' : '—— 理性审阅，快速归档 ——'}
+            </p>
+
             <div 
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full h-3/4 border border-dashed border-stone-700 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer hover:bg-stone-800/30 transition-all duration-500 group relative overflow-hidden"
+              onClick={handleSelectFile}
+              className="w-full max-w-xs aspect-[3/4] border border-dashed border-stone-700 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer hover:bg-stone-800/30 transition-all duration-500 group relative overflow-hidden"
             >
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-stone-800/50 to-transparent"></div>
               
-              <div className="relative z-10 flex flex-col items-center">
-                 <div className="w-20 h-20 rounded-full border border-stone-600 flex items-center justify-center mb-6 text-stone-500 group-hover:text-stone-300 group-hover:border-stone-400 transition-all duration-500 group-hover:scale-110">
+              <div className="relative z-10 flex flex-col items-center transform group-hover:scale-105 transition-transform duration-500">
+                 <div className="w-20 h-20 rounded-full border border-stone-600 flex items-center justify-center mb-6 text-stone-500 group-hover:text-stone-300 group-hover:border-stone-400 transition-all duration-500">
                     <Camera size={28} strokeWidth={1} />
                  </div>
                  <p className="font-serif text-stone-400 tracking-widest text-lg">拍摄旧物</p>
@@ -224,7 +278,7 @@ const ScanView = ({ onImageCaptured, onCancel }: { onImageCaptured: (file: File,
               type="file" 
               ref={fileInputRef} 
               accept="image/*" 
-              capture="environment" 
+              // Removed capture="environment" to fix Android/Simulator bug
               onChange={handleFileChange} 
               className="hidden" 
             />
@@ -246,7 +300,7 @@ const AnalyzingView = () => (
          <Loader2 size={48} className="text-amber-100/80 animate-spin duration-[3000ms]" strokeWidth={1} />
       </div>
       
-      <div className="space-y-4">
+      <div className="space-y-4 animate-pulse">
         <h2 className="text-2xl font-serif text-stone-100 tracking-[0.2em] font-light">
           读取记忆中
         </h2>
@@ -265,15 +319,16 @@ const RitualView = ({
   onComplete, 
   onCancel 
 }: { 
-  item: GeminiResponse & { imageUri: string }, 
+  item: GeminiResponse & { imageUri: string, mode: ArchiveMode }, 
   onComplete: () => void, 
   onCancel: () => void 
 }) => {
   const [holding, setHolding] = useState(false);
   const [progress, setProgress] = useState(0);
   const animationFrame = useRef<number>(0);
+  const isUtility = item.mode === 'utility';
   
-  // Audio Refs (Keeping previous logic, simplifying for this view component)
+  // Audio Refs
   const audioCtxRef = useRef<AudioContext | null>(null);
   const oscillatorRef = useRef<OscillatorNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
@@ -282,7 +337,6 @@ const RitualView = ({
     const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
     if (AudioContext) audioCtxRef.current = new AudioContext();
     return () => {
-      // Cleanup must return void, ensure we don't return the promise from close()
       if (audioCtxRef.current) {
         audioCtxRef.current.close().catch(console.error);
       }
@@ -295,24 +349,71 @@ const RitualView = ({
     if (ctx.state === 'suspended') ctx.resume();
 
     if (isStart) {
-      oscillatorRef.current = ctx.createOscillator();
-      gainNodeRef.current = ctx.createGain();
-      oscillatorRef.current.connect(gainNodeRef.current);
-      gainNodeRef.current.connect(ctx.destination);
-      oscillatorRef.current.type = 'sine';
-      oscillatorRef.current.frequency.setValueAtTime(100, ctx.currentTime);
-      gainNodeRef.current.gain.setValueAtTime(0, ctx.currentTime);
-      gainNodeRef.current.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 1);
-      oscillatorRef.current.start();
+      if (isUtility) {
+        // Utility Sound: Mechanical hum/Paper rustle
+        oscillatorRef.current = ctx.createOscillator();
+        gainNodeRef.current = ctx.createGain();
+        oscillatorRef.current.connect(gainNodeRef.current);
+        gainNodeRef.current.connect(ctx.destination);
+        oscillatorRef.current.type = 'sawtooth';
+        oscillatorRef.current.frequency.setValueAtTime(50, ctx.currentTime);
+        gainNodeRef.current.gain.setValueAtTime(0, ctx.currentTime);
+        gainNodeRef.current.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.1);
+        oscillatorRef.current.start();
+      } else {
+        // Sentiment Sound: Ethereal Sine
+        oscillatorRef.current = ctx.createOscillator();
+        gainNodeRef.current = ctx.createGain();
+        oscillatorRef.current.connect(gainNodeRef.current);
+        gainNodeRef.current.connect(ctx.destination);
+        oscillatorRef.current.type = 'sine';
+        oscillatorRef.current.frequency.setValueAtTime(100, ctx.currentTime);
+        gainNodeRef.current.gain.setValueAtTime(0, ctx.currentTime);
+        gainNodeRef.current.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 1);
+        oscillatorRef.current.start();
+      }
     } else {
       if (gainNodeRef.current) gainNodeRef.current.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.2);
       setTimeout(() => oscillatorRef.current?.stop(), 200);
+      
+      // Completion Sound (Stamp thud or Wind chime)
+      if (progress > 90) {
+        const endOsc = ctx.createOscillator();
+        const endGain = ctx.createGain();
+        endOsc.connect(endGain);
+        endGain.connect(ctx.destination);
+        
+        if (isUtility) {
+           // Stamp THUD
+           endOsc.type = 'square';
+           endOsc.frequency.setValueAtTime(80, ctx.currentTime);
+           endOsc.frequency.exponentialRampToValueAtTime(10, ctx.currentTime + 0.1);
+           endGain.gain.setValueAtTime(0.5, ctx.currentTime);
+           endGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+           endOsc.start();
+           endOsc.stop(ctx.currentTime + 0.2);
+        } else {
+           // Wind Chime
+           endOsc.type = 'sine';
+           endOsc.frequency.setValueAtTime(800, ctx.currentTime);
+           endGain.gain.setValueAtTime(0.2, ctx.currentTime);
+           endGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.5);
+           endOsc.start();
+           endOsc.stop(ctx.currentTime + 1.5);
+        }
+      }
     }
   };
 
   const updatePitch = (percent: number) => {
     if (oscillatorRef.current && audioCtxRef.current) {
-      oscillatorRef.current.frequency.setTargetAtTime(100 + (percent * 5), audioCtxRef.current.currentTime, 0.1);
+       if (isUtility) {
+         // Pitch goes down for mechanical "pressure"
+         oscillatorRef.current.frequency.setTargetAtTime(50 - (percent * 0.2), audioCtxRef.current.currentTime, 0.1);
+       } else {
+         // Pitch goes up for "ascension"
+         oscillatorRef.current.frequency.setTargetAtTime(100 + (percent * 5), audioCtxRef.current.currentTime, 0.1);
+       }
     }
   };
 
@@ -324,7 +425,8 @@ const RitualView = ({
 
   const stopHolding = () => {
     setHolding(false);
-    setProgress(0);
+    // Don't reset progress if completed
+    if (progress < 100) setProgress(0);
     playSound(false);
     if (navigator.vibrate) navigator.vibrate(0);
   };
@@ -332,7 +434,7 @@ const RitualView = ({
   useEffect(() => {
     if (holding) {
       const startTime = Date.now();
-      const duration = 3000; // Slower ritual
+      const duration = isUtility ? 1500 : 3000; // Utility is faster
       const animate = () => {
         const elapsed = Date.now() - startTime;
         const newProgress = Math.min(100, (elapsed / duration) * 100);
@@ -355,35 +457,47 @@ const RitualView = ({
   }, [holding, onComplete]);
 
   return (
-    <div className="flex flex-col h-full bg-stone-900 relative overflow-hidden items-center justify-center">
+    <div className={`flex flex-col h-full bg-stone-900 relative overflow-hidden items-center justify-center transition-colors duration-1000 ${isUtility ? 'bg-slate-900' : 'bg-stone-900'}`}>
       {/* Background Ambience */}
       <div className="absolute inset-0">
         <img src={item.imageUri} className="w-full h-full object-cover opacity-20 blur-2xl scale-110" alt="" />
-        <div className="absolute inset-0 bg-stone-900/60 mix-blend-multiply"></div>
+        <div className={`absolute inset-0 mix-blend-multiply ${isUtility ? 'bg-slate-900/80' : 'bg-stone-900/60'}`}></div>
       </div>
 
       <div className="relative z-10 w-full max-w-md px-8 flex flex-col items-center">
         {/* The Card */}
-        <div className={`bg-paper w-full rounded-sm shadow-2xl overflow-hidden mb-12 transform transition-all duration-700 ease-out p-4 pb-12 ${holding ? 'scale-95 opacity-80 filter blur-[1px]' : 'scale-100'}`}>
-           <div className="aspect-[4/3] w-full overflow-hidden bg-stone-200 mb-6 grayscale hover:grayscale-0 transition-all duration-1000">
+        <div className={`
+          w-full rounded-sm shadow-2xl overflow-hidden mb-12 transform transition-all duration-300 ease-out 
+          ${isUtility ? 'bg-stone-100 p-6 font-mono text-xs' : 'bg-paper p-4 pb-12 font-serif'}
+          ${holding && !isUtility ? 'scale-95 opacity-80 filter blur-[1px]' : ''}
+          ${holding && isUtility ? 'scale-[0.98] translate-y-1' : ''}
+        `}>
+           <div className={`aspect-[4/3] w-full overflow-hidden bg-stone-200 mb-6 transition-all duration-1000 ${isUtility ? 'grayscale contrast-125' : 'grayscale hover:grayscale-0'}`}>
              <img src={item.imageUri} className="w-full h-full object-cover" alt="Item" />
            </div>
            
-           <div className="text-center px-4">
-             <div className="text-amber-700/60 text-[10px] tracking-[0.3em] uppercase mb-3 font-serif border-b border-stone-200 pb-2 inline-block">
-               Farewell Letter
+           <div className="text-center px-2">
+             <div className={`text-[10px] tracking-[0.3em] uppercase mb-3 border-b pb-2 inline-block ${isUtility ? 'text-slate-500 border-slate-300' : 'text-amber-700/60 border-stone-200'}`}>
+               {isUtility ? 'DISPOSITION NOTE' : 'FAREWELL LETTER'}
              </div>
-             <h2 className="text-2xl font-serif text-ink mb-6">{item.title}</h2>
-             <p className="font-serif text-stone-600 text-sm leading-loose italic">
+             <h2 className={`text-2xl mb-6 text-ink ${isUtility ? 'font-bold tracking-tighter' : 'font-serif'}`}>{item.title}</h2>
+             <p className={`leading-loose ${isUtility ? 'text-slate-600 text-left border-l-2 border-slate-300 pl-4' : 'text-stone-600 italic'}`}>
                "{item.farewellMessage}"
              </p>
            </div>
+           
+           {/* Stamp Animation for Utility */}
+           {isUtility && progress === 100 && (
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border-4 border-red-700 text-red-700 rounded-lg p-2 font-black text-4xl rotate-[-15deg] opacity-80 animate-in zoom-in duration-300">
+                已 处 理
+              </div>
+           )}
         </div>
 
         {/* The Trigger */}
         <div className="relative">
            <p className={`text-stone-400 text-[10px] tracking-[0.3em] text-center mb-6 transition-opacity duration-500 ${holding ? 'opacity-0' : 'opacity-100'}`}>
-             HOLD TO RELEASE
+             {isUtility ? 'HOLD TO STAMP' : 'HOLD TO RELEASE'}
            </p>
            
            <button 
@@ -395,14 +509,17 @@ const RitualView = ({
             onMouseLeave={stopHolding}
           >
              {/* Dynamic Rings */}
-             <div className={`absolute inset-0 border border-stone-500/30 rounded-full transition-all duration-1000 ${holding ? 'scale-150 opacity-0' : 'scale-100'}`}></div>
-             <div className={`absolute inset-0 border border-stone-400/50 rounded-full scale-75 transition-all duration-1000 delay-75 ${holding ? 'scale-125 opacity-0' : 'scale-75'}`}></div>
+             <div className={`absolute inset-0 border rounded-full transition-all duration-1000 ${isUtility ? 'border-slate-500/30' : 'border-stone-500/30'} ${holding ? 'scale-150 opacity-0' : 'scale-100'}`}></div>
+             <div className={`absolute inset-0 border rounded-full scale-75 transition-all duration-1000 delay-75 ${isUtility ? 'border-slate-400/50' : 'border-stone-400/50'} ${holding ? 'scale-125 opacity-0' : 'scale-75'}`}></div>
              
              {/* Center Core */}
-             <div className={`w-3 h-3 bg-stone-200 rounded-full transition-all duration-300 ${holding ? 'scale-[6] bg-amber-100 shadow-[0_0_40px_rgba(255,255,255,0.5)]' : 'scale-100'}`}></div>
+             <div className={`w-3 h-3 rounded-full transition-all duration-300 
+               ${isUtility ? 'bg-slate-200' : 'bg-stone-200'} 
+               ${holding ? (isUtility ? 'scale-[6] bg-red-800 rounded-sm' : 'scale-[6] bg-amber-100 shadow-[0_0_40px_rgba(255,255,255,0.5)]') : 'scale-100'}
+             `}></div>
 
-             {/* Particles (CSS Simulated) */}
-             {holding && (
+             {/* Particles (Sentiment Only) */}
+             {holding && !isUtility && (
                <div className="absolute inset-0 animate-spin-slow">
                  <div className="absolute top-0 left-1/2 w-1 h-1 bg-white rounded-full opacity-50 blur-[1px]"></div>
                  <div className="absolute bottom-0 right-1/2 w-1 h-1 bg-white rounded-full opacity-50 blur-[1px]"></div>
@@ -417,10 +534,12 @@ const RitualView = ({
       </div>
 
       {/* Release Overlay */}
-      <div 
-        className="absolute inset-0 bg-white pointer-events-none transition-opacity duration-100" 
-        style={{ opacity: progress === 100 ? 1 : 0 }} 
-      ></div>
+      {!isUtility && (
+        <div 
+          className="absolute inset-0 bg-white pointer-events-none transition-opacity duration-100" 
+          style={{ opacity: progress === 100 ? 1 : 0 }} 
+        ></div>
+      )}
     </div>
   );
 };
@@ -455,7 +574,7 @@ const GalleryView = ({ items, onItemClick }: { items: ArchivedItem[], onItemClic
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search memories..."
+            placeholder="寻觅一段记忆..."
             className="w-full bg-transparent border-b border-stone-300 py-2 text-stone-600 font-serif placeholder-stone-400 focus:outline-none focus:border-stone-500 animate-fade-in"
             autoFocus
           />
@@ -466,7 +585,7 @@ const GalleryView = ({ items, onItemClick }: { items: ArchivedItem[], onItemClic
         {filteredItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 opacity-30">
              <Wind size={32} className="text-stone-400 mb-4" />
-             <p className="font-serif text-stone-400 text-sm">空</p>
+             <p className="font-serif text-stone-400 text-sm">空 无 一 物</p>
           </div>
         ) : (
           <div className="space-y-12 py-4">
@@ -479,15 +598,25 @@ const GalleryView = ({ items, onItemClick }: { items: ArchivedItem[], onItemClic
                 {/* Asymmetric Layout - alternating slightly */}
                 <div className={`flex flex-col ${index % 2 === 0 ? 'items-start' : 'items-end'}`}>
                   {/* Photo Card */}
-                  <div className="relative bg-white p-3 pb-8 shadow-[0_4px_20px_rgba(0,0,0,0.05)] transform transition-transform duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] max-w-[85%]">
-                     <div className="aspect-[4/5] overflow-hidden bg-stone-100">
-                       <img src={item.imageUri} alt={item.title} className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500 grayscale-[20%] group-hover:grayscale-0" />
+                  <div className={`
+                    relative p-3 pb-8 shadow-[0_4px_20px_rgba(0,0,0,0.05)] transform transition-transform duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] max-w-[85%]
+                    ${item.mode === 'utility' ? 'bg-stone-100' : 'bg-white'}
+                  `}>
+                     {/* Utility Indicator */}
+                     {item.mode === 'utility' && (
+                       <div className="absolute -top-2 -right-2 bg-slate-200 text-slate-600 text-[10px] px-2 py-1 rounded-sm font-bold tracking-widest z-10">
+                         FILE
+                       </div>
+                     )}
+
+                     <div className={`aspect-[4/5] overflow-hidden ${item.mode === 'utility' ? 'bg-slate-200' : 'bg-stone-100'}`}>
+                       <img src={item.imageUri} alt={item.title} className={`w-full h-full object-cover transition-opacity duration-500 ${item.mode === 'utility' ? 'opacity-80 grayscale contrast-125' : 'opacity-90 grayscale-[20%] group-hover:opacity-100 group-hover:grayscale-0'}`} />
                      </div>
                      <div className="mt-4 px-2">
-                       <div className="font-serif text-lg text-ink">{item.title}</div>
-                       <div className="flex justify-between items-center mt-2 border-t border-stone-100 pt-2">
+                       <div className={`font-serif text-lg text-ink ${item.mode === 'utility' ? 'font-sans font-bold tracking-tighter text-slate-700' : ''}`}>{item.title}</div>
+                       <div className="flex justify-between items-center mt-2 border-t border-stone-200 pt-2">
                          <span className="text-[10px] text-stone-400 uppercase tracking-widest">{new Date(item.dateArchived).toLocaleDateString()}</span>
-                         <span className="text-[10px] text-stone-500 font-serif italic">{item.sentiment}</span>
+                         <span className={`text-[10px] font-serif ${item.mode === 'utility' ? 'text-slate-500 font-sans' : 'text-stone-500 italic'}`}>{item.sentiment}</span>
                        </div>
                      </div>
                   </div>
@@ -501,39 +630,45 @@ const GalleryView = ({ items, onItemClick }: { items: ArchivedItem[], onItemClic
   );
 };
 
-// --- Detail View (Magazine Spread) ---
+// --- Detail View (Magazine Spread vs File Card) ---
 const DetailView = ({ item, onBack, onDelete }: { item: ArchivedItem, onBack: () => void, onDelete: (id: string) => void }) => {
   if (!item) return null;
+  const isUtility = item.mode === 'utility';
 
   return (
-    <div className="h-full bg-paper overflow-y-auto animate-in fade-in duration-500 relative">
+    <div className={`h-full overflow-y-auto animate-in fade-in duration-500 relative ${isUtility ? 'bg-stone-100' : 'bg-paper'}`}>
       <button 
         onClick={onBack}
-        className="fixed top-6 left-6 z-30 p-3 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/40 transition-colors"
+        className="fixed top-6 left-6 z-30 p-3 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/40 transition-colors shadow-lg"
       >
         <ArrowLeft size={20} />
       </button>
 
-      {/* Hero Image - Full Bleed Top */}
+      {/* Hero Image */}
       <div className="relative h-[60vh] w-full">
-        <img src={item.imageUri} className="w-full h-full object-cover" alt={item.title} />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-paper"></div>
+        <img src={item.imageUri} className={`w-full h-full object-cover ${isUtility ? 'grayscale contrast-125 opacity-90' : ''}`} alt={item.title} />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent"></div>
+        {/* Utility bottom fade is different */}
+        <div className={`absolute inset-0 bg-gradient-to-b from-transparent via-transparent ${isUtility ? 'to-stone-100' : 'to-paper'}`}></div>
         
         {/* Vertical Title Overlay */}
         <div className="absolute top-20 right-8 z-10 writing-mode-vertical vertical-text text-white/90 drop-shadow-lg">
-           <h1 className="text-4xl font-serif tracking-[0.2em] font-light">{item.title}</h1>
+           <h1 className={`text-4xl font-serif tracking-[0.2em] ${isUtility ? 'font-mono font-bold text-white/80' : 'font-light'}`}>{item.title}</h1>
         </div>
       </div>
 
       {/* Content */}
       <div className="relative z-20 px-8 pb-32 -mt-20">
-        <div className="bg-paper/95 backdrop-blur-sm p-8 rounded-t-sm shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)] border-t border-white/50">
+        <div className={`backdrop-blur-sm p-8 rounded-t-sm shadow-sm ${isUtility ? 'bg-stone-50 border border-stone-200' : 'bg-paper/95 border-t border-white/50'}`}>
           
           {/* Metadata Row */}
           <div className="flex justify-between items-end mb-12 border-b border-stone-200 pb-4">
              <div className="flex flex-col">
-               <span className="text-[10px] text-stone-400 uppercase tracking-widest mb-1">Sentiment</span>
-               <span className="font-serif text-stone-600">{item.sentiment}</span>
+               <span className="text-[10px] text-stone-400 uppercase tracking-widest mb-1">{isUtility ? 'Status' : 'Sentiment'}</span>
+               <span className={`font-serif text-stone-600 ${isUtility ? 'font-bold font-mono text-slate-700' : ''}`}>
+                 {isUtility && <CheckCircle2 size={12} className="inline mr-1 text-green-700" />}
+                 {item.sentiment}
+               </span>
              </div>
              <div className="flex flex-col items-end">
                <span className="text-[10px] text-stone-400 uppercase tracking-widest mb-1">Date</span>
@@ -543,18 +678,20 @@ const DetailView = ({ item, onBack, onDelete }: { item: ArchivedItem, onBack: ()
 
           {/* Letter Section */}
           <div className="mb-16 relative">
-            <Feather className="absolute -top-6 -left-2 text-stone-200 w-12 h-12 -z-10 opacity-50" />
-            <p className="font-serif text-lg leading-loose text-ink text-justify indent-8">
+            {!isUtility && <Feather className="absolute -top-6 -left-2 text-stone-200 w-12 h-12 -z-10 opacity-50" />}
+            {isUtility && <FileText className="absolute -top-6 -left-2 text-slate-200 w-12 h-12 -z-10 opacity-50" />}
+            
+            <p className={`text-lg leading-loose text-ink text-justify ${isUtility ? 'font-mono text-sm' : 'font-serif indent-8'}`}>
               {item.description}
             </p>
           </div>
 
           {/* Farewell Quote */}
-          <div className="bg-stone-50 p-8 relative mb-16 border-l-2 border-amber-800/20">
-             <div className="absolute -top-3 left-4 bg-stone-50 px-2 text-amber-900/40 text-xs tracking-widest font-serif uppercase">
-               Message
+          <div className={`p-8 relative mb-16 ${isUtility ? 'bg-slate-200/50 border-2 border-dashed border-slate-300' : 'bg-stone-50 border-l-2 border-amber-800/20'}`}>
+             <div className={`absolute -top-3 left-4 px-2 text-xs tracking-widest uppercase ${isUtility ? 'bg-stone-100 text-slate-500 font-bold' : 'bg-stone-50 text-amber-900/40 font-serif'}`}>
+               {isUtility ? 'Disposition Note' : 'Message'}
              </div>
-             <p className="font-serif text-stone-600 italic leading-loose">
+             <p className={`text-stone-600 leading-loose ${isUtility ? 'font-mono text-xs' : 'font-serif italic'}`}>
                "{item.farewellMessage}"
              </p>
           </div>
@@ -564,7 +701,7 @@ const DetailView = ({ item, onBack, onDelete }: { item: ArchivedItem, onBack: ()
               onClick={() => onDelete(item.id)}
               className="text-xs text-stone-300 hover:text-red-400 transition-colors tracking-widest uppercase border-b border-transparent hover:border-red-400 pb-1"
             >
-              Forget this memory
+              {isUtility ? 'Remove Record' : '将此记忆抹去'}
             </button>
           </div>
         </div>
@@ -579,21 +716,22 @@ export default function App() {
   const [view, setView] = useState<AppView>(AppView.HOME);
   const [items, setItems] = useState<ArchivedItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<ArchivedItem | null>(null);
-  const [pendingAnalysis, setPendingAnalysis] = useState<(GeminiResponse & { imageUri: string, userNote: string }) | null>(null);
+  const [pendingAnalysis, setPendingAnalysis] = useState<(GeminiResponse & { imageUri: string, userNote: string, mode: ArchiveMode }) | null>(null);
 
   useEffect(() => {
     setItems(getItems());
   }, [view]);
 
-  const handleArchiveStart = async (file: File, note: string) => {
+  const handleArchiveStart = async (file: File, note: string, mode: ArchiveMode) => {
     setView(AppView.ANALYZING);
     try {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onloadend = async () => {
         const base64 = reader.result as string;
-        const analysis: GeminiResponse = await archiveObject(base64, note);
-        setPendingAnalysis({ ...analysis, imageUri: base64, userNote: note });
+        const analysis: GeminiResponse = await archiveObject(base64, note, mode);
+        // Ensure mode is passed through if Gemini doesn't return it implicitly (though we patch it in service)
+        setPendingAnalysis({ ...analysis, imageUri: base64, userNote: note, mode: analysis.mode || mode });
         setView(AppView.RITUAL);
       };
     } catch (e) {
@@ -613,7 +751,8 @@ export default function App() {
         sentiment: pendingAnalysis.sentiment,
         category: pendingAnalysis.category,
         dateArchived: Date.now(),
-        userNote: pendingAnalysis.userNote
+        userNote: pendingAnalysis.userNote,
+        mode: pendingAnalysis.mode
       };
       saveItem(newItem);
       setSelectedItem(newItem);
@@ -623,7 +762,8 @@ export default function App() {
   };
 
   const handleDelete = (id: string) => {
-    if(confirm("遗忘是最终的告别。确定吗？")) {
+    // Only prompt nicely
+    if(confirm("确定要删除这条记录吗？")) {
       deleteItem(id);
       setView(AppView.GALLERY);
     }
