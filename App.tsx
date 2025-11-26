@@ -472,13 +472,13 @@ const RitualView = ({
           ${holding && !isUtility ? 'scale-95 opacity-80 filter blur-[1px]' : ''}
           ${holding && isUtility ? 'scale-[0.98] translate-y-1' : ''}
         `}>
-           <div className={`aspect-[4/3] w-full overflow-hidden bg-stone-200 mb-6 transition-all duration-1000 ${isUtility ? 'grayscale contrast-125' : 'grayscale hover:grayscale-0'}`}>
+           <div className={`aspect-[4/3] w-full overflow-hidden bg-stone-200 mb-6 transition-all duration-1000 ${isUtility ? 'grayscale-[50%] contrast-110' : 'grayscale-[20%] hover:grayscale-0'}`}>
              <img src={item.imageUri} className="w-full h-full object-cover" alt="Item" />
            </div>
            
            <div className="text-center px-2">
              <div className={`text-[10px] tracking-[0.3em] uppercase mb-3 border-b pb-2 inline-block ${isUtility ? 'text-slate-500 border-slate-300' : 'text-amber-700/60 border-stone-200'}`}>
-               {isUtility ? 'DISPOSITION NOTE' : 'FAREWELL LETTER'}
+               {isUtility ? '处置回执' : '告别信'}
              </div>
              <h2 className={`text-2xl mb-6 text-ink ${isUtility ? 'font-bold tracking-tighter' : 'font-serif'}`}>{item.title}</h2>
              <p className={`leading-loose ${isUtility ? 'text-slate-600 text-left border-l-2 border-slate-300 pl-4' : 'text-stone-600 italic'}`}>
@@ -497,7 +497,7 @@ const RitualView = ({
         {/* The Trigger */}
         <div className="relative">
            <p className={`text-stone-400 text-[10px] tracking-[0.3em] text-center mb-6 transition-opacity duration-500 ${holding ? 'opacity-0' : 'opacity-100'}`}>
-             {isUtility ? 'HOLD TO STAMP' : 'HOLD TO RELEASE'}
+             {isUtility ? '长按 · 归档' : '长按 · 释怀'}
            </p>
            
            <button 
@@ -610,7 +610,7 @@ const GalleryView = ({ items, onItemClick }: { items: ArchivedItem[], onItemClic
                      )}
 
                      <div className={`aspect-[4/5] overflow-hidden ${item.mode === 'utility' ? 'bg-slate-200' : 'bg-stone-100'}`}>
-                       <img src={item.imageUri} alt={item.title} className={`w-full h-full object-cover transition-opacity duration-500 ${item.mode === 'utility' ? 'opacity-80 grayscale contrast-125' : 'opacity-90 grayscale-[20%] group-hover:opacity-100 group-hover:grayscale-0'}`} />
+                       <img src={item.imageUri} alt={item.title} className={`w-full h-full object-cover transition-opacity duration-500 ${item.mode === 'utility' ? 'opacity-90 saturate-[0.8] contrast-110' : 'opacity-95 saturate-[0.8] group-hover:saturate-100'}`} />
                      </div>
                      <div className="mt-4 px-2">
                        <div className={`font-serif text-lg text-ink ${item.mode === 'utility' ? 'font-sans font-bold tracking-tighter text-slate-700' : ''}`}>{item.title}</div>
@@ -639,45 +639,53 @@ const DetailView = ({ item, onBack, onDelete }: { item: ArchivedItem, onBack: ()
     <div className={`h-full overflow-y-auto animate-in fade-in duration-500 relative ${isUtility ? 'bg-stone-100' : 'bg-paper'}`}>
       <button 
         onClick={onBack}
-        className="fixed top-6 left-6 z-30 p-3 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/40 transition-colors shadow-lg"
+        className="fixed top-6 left-6 z-30 p-3 bg-black/20 backdrop-blur-md rounded-full text-white hover:bg-black/40 transition-colors shadow-lg"
       >
         <ArrowLeft size={20} />
       </button>
 
       {/* Hero Image */}
-      <div className="relative h-[60vh] w-full">
-        <img src={item.imageUri} className={`w-full h-full object-cover ${isUtility ? 'grayscale contrast-125 opacity-90' : ''}`} alt={item.title} />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent"></div>
-        {/* Utility bottom fade is different */}
-        <div className={`absolute inset-0 bg-gradient-to-b from-transparent via-transparent ${isUtility ? 'to-stone-100' : 'to-paper'}`}></div>
+      <div className="relative h-[45vh] w-full">
+        {/* Adjusted Image: No grayscale, just slight desaturation and dimming for text contrast */}
+        <img 
+          src={item.imageUri} 
+          className={`w-full h-full object-cover transition-all duration-700 ${isUtility ? 'saturate-[0.5] contrast-110' : 'saturate-[0.85] brightness-90'}`} 
+          alt={item.title} 
+        />
+        
+        {/* Top Gradient for Navigation & Title Visibility */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent pointer-events-none"></div>
+        
+        {/* Bottom Fade Gradient (Smooth transition to content) */}
+        <div className={`absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t ${isUtility ? 'from-stone-100' : 'from-paper'} to-transparent`}></div>
         
         {/* Vertical Title Overlay */}
-        <div className="absolute top-20 right-8 z-10 writing-mode-vertical vertical-text text-white/90 drop-shadow-lg">
-           <h1 className={`text-4xl font-serif tracking-[0.2em] ${isUtility ? 'font-mono font-bold text-white/80' : 'font-light'}`}>{item.title}</h1>
+        <div className="absolute top-20 right-8 z-10 writing-mode-vertical vertical-text text-white/95 drop-shadow-lg">
+           <h1 className={`text-3xl font-serif tracking-[0.2em] leading-loose ${isUtility ? 'font-mono font-bold text-white/90' : 'font-light'}`}>{item.title}</h1>
         </div>
       </div>
 
       {/* Content */}
-      <div className="relative z-20 px-8 pb-32 -mt-20">
-        <div className={`backdrop-blur-sm p-8 rounded-t-sm shadow-sm ${isUtility ? 'bg-stone-50 border border-stone-200' : 'bg-paper/95 border-t border-white/50'}`}>
+      <div className="relative z-20 px-6 pb-20 -mt-12">
+        <div className={`backdrop-blur-sm p-6 rounded-t-sm shadow-sm ${isUtility ? 'bg-stone-50 border border-stone-200' : 'bg-paper/95 border-t border-white/50'}`}>
           
           {/* Metadata Row */}
-          <div className="flex justify-between items-end mb-12 border-b border-stone-200 pb-4">
+          <div className="flex justify-between items-end mb-6 border-b border-stone-200 pb-4">
              <div className="flex flex-col">
-               <span className="text-[10px] text-stone-400 uppercase tracking-widest mb-1">{isUtility ? 'Status' : 'Sentiment'}</span>
+               <span className="text-[10px] text-stone-400 uppercase tracking-widest mb-1">{isUtility ? '状态' : '情感印记'}</span>
                <span className={`font-serif text-stone-600 ${isUtility ? 'font-bold font-mono text-slate-700' : ''}`}>
                  {isUtility && <CheckCircle2 size={12} className="inline mr-1 text-green-700" />}
                  {item.sentiment}
                </span>
              </div>
              <div className="flex flex-col items-end">
-               <span className="text-[10px] text-stone-400 uppercase tracking-widest mb-1">Date</span>
+               <span className="text-[10px] text-stone-400 uppercase tracking-widest mb-1">{isUtility ? '封存日期' : '封存日期'}</span>
                <span className="font-serif text-stone-600">{new Date(item.dateArchived).toLocaleDateString()}</span>
              </div>
           </div>
 
           {/* Letter Section */}
-          <div className="mb-16 relative">
+          <div className="mb-10 relative">
             {!isUtility && <Feather className="absolute -top-6 -left-2 text-stone-200 w-12 h-12 -z-10 opacity-50" />}
             {isUtility && <FileText className="absolute -top-6 -left-2 text-slate-200 w-12 h-12 -z-10 opacity-50" />}
             
@@ -687,21 +695,21 @@ const DetailView = ({ item, onBack, onDelete }: { item: ArchivedItem, onBack: ()
           </div>
 
           {/* Farewell Quote */}
-          <div className={`p-8 relative mb-16 ${isUtility ? 'bg-slate-200/50 border-2 border-dashed border-slate-300' : 'bg-stone-50 border-l-2 border-amber-800/20'}`}>
+          <div className={`p-6 relative mb-12 ${isUtility ? 'bg-slate-200/50 border-2 border-dashed border-slate-300' : 'bg-stone-50 border-l-2 border-amber-800/20'}`}>
              <div className={`absolute -top-3 left-4 px-2 text-xs tracking-widest uppercase ${isUtility ? 'bg-stone-100 text-slate-500 font-bold' : 'bg-stone-50 text-amber-900/40 font-serif'}`}>
-               {isUtility ? 'Disposition Note' : 'Message'}
+               {isUtility ? '处置回执' : '物品寄语'}
              </div>
              <p className={`text-stone-600 leading-loose ${isUtility ? 'font-mono text-xs' : 'font-serif italic'}`}>
                "{item.farewellMessage}"
              </p>
           </div>
 
-          <div className="flex justify-center mt-12">
+          <div className="flex justify-center mt-8">
             <button 
               onClick={() => onDelete(item.id)}
               className="text-xs text-stone-300 hover:text-red-400 transition-colors tracking-widest uppercase border-b border-transparent hover:border-red-400 pb-1"
             >
-              {isUtility ? 'Remove Record' : '将此记忆抹去'}
+              {isUtility ? '移除此记录' : '将此记忆抹去'}
             </button>
           </div>
         </div>
