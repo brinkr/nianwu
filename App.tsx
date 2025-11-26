@@ -20,7 +20,12 @@ import {
   Stamp,
   CheckCircle2,
   List,
-  Grid
+  Grid,
+  Settings,
+  Download,
+  Upload,
+  RefreshCcw,
+  User
 } from 'lucide-react';
 import { archiveObject } from './services/geminiService';
 import { saveItem, getItems, deleteItem, getUserStats, seedDatabase } from './services/storageService';
@@ -29,42 +34,169 @@ import { ArchivedItem, AppView, GeminiResponse, UserStats, ArchiveMode } from '.
 // --- Artistic Components ---
 
 const FloatingNavBar = ({ currentView, setView }: { currentView: AppView, setView: (v: AppView) => void }) => (
-  <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in-up">
-    <div className="flex items-center space-x-8 bg-stone-900/95 backdrop-blur-xl px-10 py-5 rounded-full shadow-2xl border border-stone-800/50 ring-1 ring-white/5">
+  <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in-up">
+    {/* 
+      Design Concept: "The Ink & Paper" 
+      Container is frosted glass (Paper/Void), Center button is solid (Ink/Substance).
+    */}
+    <div className="flex items-center gap-1 pl-6 pr-2 py-1.5 bg-[#e7e5e4]/80 backdrop-blur-xl rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/40 ring-1 ring-white/20">
+      
+      {/* Left: Home / Self */}
       <button 
         onClick={() => setView(AppView.HOME)}
-        className={`transition-all duration-500 ease-out group ${currentView === AppView.HOME ? 'text-amber-100 scale-110' : 'text-stone-500 hover:text-stone-300'}`}
+        className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 group ${currentView === AppView.HOME ? 'text-stone-800 bg-white/60 shadow-sm' : 'text-stone-500 hover:text-stone-700 hover:bg-white/40'}`}
       >
-        <div className="flex flex-col items-center space-y-1">
-          <Feather size={22} strokeWidth={currentView === AppView.HOME ? 2 : 1.5} className="group-hover:animate-pulse" />
-        </div>
+        <Feather size={20} strokeWidth={currentView === AppView.HOME ? 2 : 1.5} className="transition-transform duration-500 group-hover:-translate-y-0.5" />
       </button>
       
-      <div className="w-px h-8 bg-stone-700/50"></div>
+      {/* Divider (Subtle) */}
+      <div className="w-px h-4 bg-stone-400/20 mx-2"></div>
 
-      <button 
-        onClick={() => setView(AppView.SCAN)}
-        className="bg-stone-100 text-stone-900 p-4 rounded-full hover:bg-white hover:scale-110 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-95 group"
-      >
-        <Plus size={28} strokeWidth={2} className="group-hover:rotate-90 transition-transform duration-500" />
-      </button>
-
-      <div className="w-px h-8 bg-stone-700/50"></div>
-
+      {/* Right: Gallery */}
       <button 
         onClick={() => setView(AppView.GALLERY)}
-        className={`transition-all duration-500 ease-out ${currentView === AppView.GALLERY ? 'text-amber-100 scale-110' : 'text-stone-500 hover:text-stone-300'}`}
+        className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 group ${currentView === AppView.GALLERY ? 'text-stone-800 bg-white/60 shadow-sm' : 'text-stone-500 hover:text-stone-700 hover:bg-white/40'}`}
       >
-        <div className="flex flex-col items-center space-y-1">
-           <Archive size={22} strokeWidth={currentView === AppView.GALLERY ? 2 : 1.5} />
-        </div>
+         <Archive size={20} strokeWidth={currentView === AppView.GALLERY ? 2 : 1.5} className="transition-transform duration-500 group-hover:-translate-y-0.5" />
       </button>
+
+      {/* Center: Action (The Ink Drop) - Visually distinct and pushed to the right slightly or separated */}
+      <div className="ml-3">
+        <button 
+          onClick={() => setView(AppView.SCAN)}
+          className="w-14 h-14 bg-stone-800 text-stone-100 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:bg-stone-900 hover:scale-105 active:scale-95 transition-all duration-300 group"
+        >
+          <Plus size={26} strokeWidth={1.5} className="group-hover:rotate-90 transition-transform duration-500" />
+        </button>
+      </div>
+
     </div>
   </div>
 );
 
+// --- Settings / Data Sheet (The Hidden Fourth Entry) ---
+const SettingsSheet = ({ isOpen, onClose, onSeedData }: { isOpen: boolean, onClose: () => void, onSeedData: () => void }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleExport = () => {
+    const items = getItems();
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "nianwu_backup_" + new Date().toISOString().slice(0,10) + ".json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        if (Array.isArray(json)) {
+          // Validate roughly
+          if (json.length > 0 && !json[0].id) throw new Error("Invalid format");
+          localStorage.setItem('digital_keep_items_v2', JSON.stringify(json));
+          alert("记忆回溯成功。即将刷新...");
+          window.location.reload();
+        }
+      } catch (err) {
+        alert("文件格式有误，无法解析。");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div 
+        className={`fixed inset-0 bg-stone-900/20 backdrop-blur-sm z-50 transition-opacity duration-500 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        onClick={onClose}
+      ></div>
+      
+      {/* Sheet */}
+      <div className={`fixed bottom-0 left-0 right-0 bg-[#f2f0e9] rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-50 transition-transform duration-500 ease-out transform ${isOpen ? 'translate-y-0' : 'translate-y-full'} max-h-[80vh] overflow-y-auto`}>
+        <div className="p-8 pb-12">
+           <div className="w-12 h-1 bg-stone-300 rounded-full mx-auto mb-8"></div>
+           
+           <h3 className="font-serif text-2xl text-ink mb-2">数据方舟</h3>
+           <p className="text-xs text-stone-500 tracking-widest font-serif mb-8">DATA ARK · 记忆备份与管理</p>
+           
+           <div className="space-y-4">
+             <button 
+               onClick={handleExport}
+               className="w-full py-4 px-6 bg-white border border-stone-200 rounded-xl flex items-center justify-between group hover:border-stone-400 transition-all"
+             >
+               <div className="flex items-center space-x-4">
+                 <div className="p-2 bg-stone-100 rounded-full text-stone-600 group-hover:bg-stone-200 transition-colors">
+                   <Download size={20} strokeWidth={1.5} />
+                 </div>
+                 <div className="text-left">
+                   <div className="text-stone-800 font-serif">记忆结集 (导出)</div>
+                   <div className="text-[10px] text-stone-400 tracking-wide">保存当前所有数据为 JSON 文件</div>
+                 </div>
+               </div>
+               <ArrowLeft size={16} className="rotate-180 text-stone-300 group-hover:text-stone-600 transition-colors" />
+             </button>
+
+             <button 
+               onClick={handleImportClick}
+               className="w-full py-4 px-6 bg-white border border-stone-200 rounded-xl flex items-center justify-between group hover:border-stone-400 transition-all"
+             >
+               <div className="flex items-center space-x-4">
+                 <div className="p-2 bg-stone-100 rounded-full text-stone-600 group-hover:bg-stone-200 transition-colors">
+                   <Upload size={20} strokeWidth={1.5} />
+                 </div>
+                 <div className="text-left">
+                   <div className="text-stone-800 font-serif">时光回溯 (导入)</div>
+                   <div className="text-[10px] text-stone-400 tracking-wide">从备份文件恢复数据</div>
+                 </div>
+               </div>
+               <ArrowLeft size={16} className="rotate-180 text-stone-300 group-hover:text-stone-600 transition-colors" />
+             </button>
+             <input type="file" ref={fileInputRef} onChange={handleFileImport} accept=".json" className="hidden" />
+
+             <div className="h-px bg-stone-200 my-6"></div>
+
+             <button 
+               onClick={onSeedData}
+               className="w-full py-4 px-6 bg-stone-100/50 border border-stone-200/50 rounded-xl flex items-center justify-between group hover:bg-amber-50/50 hover:border-amber-200/50 transition-all"
+             >
+               <div className="flex items-center space-x-4">
+                 <div className="p-2 bg-white rounded-full text-amber-600/70 group-hover:text-amber-600 transition-colors">
+                   <Sparkles size={20} strokeWidth={1.5} />
+                 </div>
+                 <div className="text-left">
+                   <div className="text-stone-700 font-serif">注入演示数据</div>
+                   <div className="text-[10px] text-stone-400 tracking-wide">快速体验应用功能</div>
+                 </div>
+               </div>
+             </button>
+
+             <button 
+               onClick={() => { if(confirm('确定要重置所有数据吗？此操作无法撤销。')) { localStorage.clear(); window.location.reload(); } }}
+               className="w-full py-4 px-6 bg-transparent border border-dashed border-stone-300 rounded-xl flex items-center justify-center space-x-2 group hover:border-red-300 hover:bg-red-50/30 transition-all mt-4"
+             >
+                <RefreshCcw size={16} className="text-stone-400 group-hover:text-red-400 transition-colors" />
+                <span className="text-stone-400 text-xs tracking-widest group-hover:text-red-400 transition-colors">重置应用</span>
+             </button>
+           </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
 // --- Home View (Zen Sanctuary) ---
-const HomeView = ({ onStartDeclutter, onSeedData }: { onStartDeclutter: () => void, onSeedData: () => void }) => {
+const HomeView = ({ onStartDeclutter, onSeedData, onOpenSettings }: { onStartDeclutter: () => void, onSeedData: () => void, onOpenSettings: () => void }) => {
   const [stats, setStats] = useState<UserStats | null>(null);
 
   useEffect(() => {
@@ -78,18 +210,27 @@ const HomeView = ({ onStartDeclutter, onSeedData }: { onStartDeclutter: () => vo
       {/* Dynamic Background */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-b from-stone-200/40 to-transparent rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none animate-float"></div>
       
-      <div className="flex-1 flex flex-col p-8 pt-16 relative z-10">
-        <header className="mb-12 flex justify-between items-start animate-fade-in-up">
-          <div>
-            <h1 className="text-5xl font-serif text-ink mb-2 tracking-tight">念物</h1>
-            <p className="text-stone-400 text-xs tracking-[0.3em] uppercase opacity-70">Digital Keep</p>
+      <div className="flex-1 flex flex-col p-8 pt-12 relative z-10">
+        <header className="mb-12 flex justify-between items-start animate-fade-in-up relative z-20">
+          {/* Left: Settings Trigger (Hidden in plain sight) */}
+          <button 
+             onClick={onOpenSettings}
+             className="p-2 -ml-2 text-stone-400 hover:text-stone-600 transition-colors opacity-60 hover:opacity-100"
+          >
+             <Settings size={20} strokeWidth={1.5} />
+          </button>
+
+          <div className="text-right">
+             <h1 className="text-4xl font-serif text-ink mb-1 tracking-tight">念物</h1>
+             <p className="text-stone-400 text-[10px] tracking-[0.3em] uppercase opacity-70">Digital Keep</p>
           </div>
-          <div className="vertical-text text-stone-300 font-serif text-xs h-24 tracking-widest opacity-60">
+          
+          <div className="absolute top-12 right-0 vertical-text text-stone-300 font-serif text-xs h-24 tracking-widest opacity-40 pointer-events-none">
              万物皆有灵 · 唯舍即是得
           </div>
         </header>
 
-        <div className="flex-1 flex flex-col items-center justify-center relative -mt-10">
+        <div className="flex-1 flex flex-col items-center justify-center relative -mt-20">
           {/* Zen Circle Visualization */}
           <div className="relative w-72 h-72 flex items-center justify-center">
             {/* The Breathing Orb */}
@@ -126,23 +267,6 @@ const HomeView = ({ onStartDeclutter, onSeedData }: { onStartDeclutter: () => vo
           <p className="font-serif text-stone-500 text-sm text-center leading-loose max-w-xs italic opacity-80">
             "我们告别的不是物品，<br/>而是依附在物品上的那个旧的自己。"
           </p>
-          
-          {/* Demo Controls - Made Visible */}
-          <div className="flex flex-col items-center gap-4 opacity-50 hover:opacity-100 transition-opacity">
-             <button 
-               onClick={onSeedData}
-               className="px-6 py-2 rounded-full border border-stone-300 text-stone-500 text-xs tracking-[0.2em] hover:bg-stone-200/50 hover:text-stone-700 transition-all font-serif"
-             >
-               注入演示数据
-             </button>
-             
-             <button 
-               onClick={() => { localStorage.clear(); window.location.reload(); }}
-               className="text-[10px] text-stone-300 tracking-[0.2em] uppercase hover:text-red-400 transition-colors"
-             >
-               重置应用数据
-             </button>
-          </div>
         </div>
       </div>
     </div>
@@ -549,7 +673,7 @@ const RitualView = ({
 // --- Gallery View Components ---
 
 // Refined Utility Row - Ledger Style
-const UtilityRow = ({ item, onClick }: { item: ArchivedItem, onClick: () => void }) => (
+const UtilityRow: React.FC<{ item: ArchivedItem, onClick: () => void }> = ({ item, onClick }) => (
   <div onClick={onClick} className="flex items-center p-3 border-b border-stone-300/60 bg-[#f4f2ea] hover:bg-[#eae8df] transition-colors cursor-pointer group relative overflow-hidden">
     {/* Ledger decorative line */}
     <div className="absolute left-0 top-0 bottom-0 w-1 bg-stone-300/50"></div>
@@ -574,7 +698,7 @@ const UtilityRow = ({ item, onClick }: { item: ArchivedItem, onClick: () => void
   </div>
 );
 
-const SentimentCard = ({ item, onClick, index }: { item: ArchivedItem, onClick: () => void, index: number }) => (
+const SentimentCard: React.FC<{ item: ArchivedItem, onClick: () => void, index: number }> = ({ item, onClick, index }) => (
   <div onClick={onClick} className={`mb-8 break-inside-avoid cursor-pointer group`}>
      <div className="relative overflow-hidden bg-white p-3 pb-6 shadow-[0_2px_10px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)] transition-all duration-500 rounded-sm">
         <div className="aspect-[3/4] overflow-hidden bg-stone-100 mb-4 relative">
@@ -780,6 +904,7 @@ export default function App() {
   const [items, setItems] = useState<ArchivedItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<ArchivedItem | null>(null);
   const [pendingAnalysis, setPendingAnalysis] = useState<(GeminiResponse & { imageUri: string, userNote: string, mode: ArchiveMode }) | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     setItems(getItems());
@@ -835,7 +960,13 @@ export default function App() {
   return (
     <div className="h-screen w-screen overflow-hidden bg-paper font-sans text-stone-900 selection:bg-stone-200">
       {/* View Routing */}
-      {view === AppView.HOME && <HomeView onStartDeclutter={() => setView(AppView.SCAN)} onSeedData={() => {seedDatabase(); setItems(getItems());}} />}
+      {view === AppView.HOME && (
+        <HomeView 
+          onStartDeclutter={() => setView(AppView.SCAN)} 
+          onSeedData={() => {seedDatabase(); setItems(getItems());}} 
+          onOpenSettings={() => setIsSettingsOpen(true)}
+        />
+      )}
       {view === AppView.SCAN && <ScanView onImageCaptured={handleArchiveStart} onCancel={() => setView(AppView.HOME)} />}
       {view === AppView.ANALYZING && <AnalyzingView />}
       {view === AppView.RITUAL && pendingAnalysis && <RitualView item={pendingAnalysis} onComplete={handleRitualComplete} onCancel={() => setView(AppView.HOME)} />}
@@ -846,6 +977,13 @@ export default function App() {
       {(view === AppView.HOME || view === AppView.GALLERY) && (
         <FloatingNavBar currentView={view} setView={setView} />
       )}
+
+      {/* Settings Overlay */}
+      <SettingsSheet 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        onSeedData={() => {seedDatabase(); setItems(getItems());}}
+      />
     </div>
   );
 }
