@@ -367,15 +367,72 @@ const RitualView = ({ item, onComplete, onCancel, nickname }: { item: GeminiResp
            </div>
            {isUtility && progress === 100 && (<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border-4 border-red-700 text-red-700 rounded-lg p-2 font-black text-4xl rotate-[-15deg] opacity-80 animate-in zoom-in duration-300">已 处 理</div>)}
         </div>
-        <div className="relative">
-           <p className={`text-stone-400 text-[10px] tracking-[0.3em] text-center mb-6 transition-opacity duration-500 ${holding ? 'opacity-0' : 'opacity-100'}`}>{isUtility ? '长按 · 归档' : '长按 · 释怀'}</p>
-           <button className="group relative w-20 h-20 flex items-center justify-center outline-none touch-none" onMouseDown={startHolding} onMouseUp={stopHolding} onTouchStart={(e) => { e.preventDefault(); startHolding(); }} onTouchEnd={(e) => { e.preventDefault(); stopHolding(); }} onMouseLeave={stopHolding}>
-             <div className={`absolute inset-0 border rounded-full transition-all duration-1000 ${isUtility ? 'border-slate-500/30' : 'border-stone-500/30'} ${holding ? 'scale-150 opacity-0' : 'scale-100'}`}></div>
-             <div className={`absolute inset-0 border rounded-full scale-75 transition-all duration-1000 delay-75 ${isUtility ? 'border-slate-400/50' : 'border-stone-400/50'} ${holding ? 'scale-125 opacity-0' : 'scale-75'}`}></div>
-             <div className={`w-3 h-3 rounded-full transition-all duration-300 ${isUtility ? 'bg-slate-200' : 'bg-stone-200'} ${holding ? (isUtility ? 'scale-[6] bg-red-800 rounded-sm' : 'scale-[6] bg-amber-100 shadow-[0_0_40px_rgba(255,255,255,0.5)]') : 'scale-100'}`}></div>
-             {holding && !isUtility && (<div className="absolute inset-0 animate-spin-slow"><div className="absolute top-0 left-1/2 w-1 h-1 bg-white rounded-full opacity-50 blur-[1px]"></div><div className="absolute bottom-0 right-1/2 w-1 h-1 bg-white rounded-full opacity-50 blur-[1px]"></div></div>)}
-           </button>
+        
+        <div className="relative flex flex-col items-center">
+          <p className={`text-stone-400 text-[10px] tracking-[0.3em] text-center mb-6 transition-opacity duration-500 ${holding ? 'opacity-0' : 'opacity-100'}`}>
+            {isUtility ? '长按 · 归档' : '长按 · 释怀'}
+          </p>
+          
+          <div className="relative w-24 h-24 flex items-center justify-center">
+              {/* Circular Progress Ring */}
+              <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="46" fill="none" stroke={isUtility ? "rgba(148, 163, 184, 0.2)" : "rgba(168, 162, 158, 0.2)"} strokeWidth="2" />
+                  <circle 
+                      cx="50" cy="50" r="46" 
+                      fill="none" 
+                      stroke={isUtility ? "#3b82f6" : "#d97706"} 
+                      strokeWidth="2"
+                      strokeDasharray={2 * Math.PI * 46}
+                      strokeDashoffset={2 * Math.PI * 46 * (1 - progress / 100)}
+                      strokeLinecap="round"
+                      className="transition-all duration-100 ease-linear"
+                      style={{ opacity: holding || progress > 0 ? 1 : 0 }}
+                  />
+              </svg>
+
+              {/* Enhanced Action Button */}
+              <button
+                  className={`group relative w-16 h-16 rounded-full flex items-center justify-center outline-none touch-none transition-all duration-500 ${holding ? 'scale-95' : 'scale-100 hover:scale-105'}`}
+                  onMouseDown={startHolding} 
+                  onMouseUp={stopHolding} 
+                  onTouchStart={(e) => { e.preventDefault(); startHolding(); }} 
+                  onTouchEnd={(e) => { e.preventDefault(); stopHolding(); }} 
+                  onMouseLeave={stopHolding}
+              >
+                  {isUtility ? (
+                      // Utility Mode: Mechanical Stamp
+                      <>
+                         <div className="absolute inset-0 rounded-full bg-gradient-to-br from-slate-100 to-slate-300 shadow-lg border border-slate-200"></div>
+                         <div className={`relative transition-all duration-300 ${holding ? 'scale-90 opacity-100' : 'scale-100 opacity-60'}`}>
+                            <Stamp size={24} className="text-slate-500" />
+                         </div>
+                      </>
+                  ) : (
+                      // Sentiment Mode: Organic Breathing Light
+                      <>
+                         {/* Idle State: Breathing */}
+                         <div className={`absolute inset-0 rounded-full border border-stone-300 bg-white/50 backdrop-blur-sm shadow-sm transition-all duration-500 ${holding ? 'opacity-0 scale-50' : 'opacity-100 scale-100 animate-[breathe_4s_infinite]'}`}></div>
+                         
+                         {/* Holding State: Inner Glow */}
+                         <div className={`absolute inset-0 rounded-full bg-gradient-to-tr from-amber-100 to-white shadow-[0_0_20px_rgba(251,191,36,0.3)] transition-all duration-300 ${holding ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}></div>
+                         
+                         <div className={`relative transition-all duration-500 ${holding ? 'opacity-100 scale-125 text-amber-500' : 'opacity-40 scale-100 text-stone-400'}`}>
+                           <Feather size={20} strokeWidth={1.5} />
+                         </div>
+                         
+                         {/* Ripple Waves */}
+                         {holding && (
+                           <>
+                             <div className="absolute inset-0 rounded-full border border-amber-200 animate-ping opacity-20"></div>
+                             <div className="absolute inset-0 rounded-full border border-amber-300 animate-ping opacity-20 delay-150"></div>
+                           </>
+                         )}
+                      </>
+                  )}
+              </button>
+          </div>
         </div>
+        
         <button onClick={onCancel} className={`mt-8 text-stone-600 text-xs hover:text-stone-400 transition-colors ${holding ? 'opacity-0' : 'opacity-100'}`}>取消</button>
       </div>
       {!isUtility && (<div className="absolute inset-0 bg-white pointer-events-none transition-opacity duration-100" style={{ opacity: progress === 100 ? 1 : 0 }} ></div>)}
