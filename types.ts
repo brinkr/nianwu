@@ -1,8 +1,9 @@
+
 export type ArchiveMode = 'sentiment' | 'utility';
 
 export interface ArchivedItem {
   id: string;
-  imageUri: string;
+  imageUris: string[]; // Changed to array to support multiple images
   title: string;
   description: string;
   farewellMessage: string; // For utility, this is the "Disposition Note"
@@ -11,6 +12,7 @@ export interface ArchivedItem {
   dateArchived: number;
   userNote?: string;
   mode: ArchiveMode;
+  estimatedVolume?: number; // Estimated volume in cubic meters
 }
 
 export interface GeminiResponse {
@@ -19,6 +21,7 @@ export interface GeminiResponse {
   farewellMessage: string;
   sentiment: string;
   category: string;
+  estimatedVolume: number;
   mode?: ArchiveMode;
 }
 
